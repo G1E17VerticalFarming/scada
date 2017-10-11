@@ -5,12 +5,29 @@
  */
 package scada.domain;
 
-import interfaces.IScadaFacade;
+import API.IScadaFacade;
+import java.util.List;
+import shared.ProductionBlock;
 
 /**
  *
  * @author chris
  */
 public class Scada implements IScadaFacade {
+
+    @Override
+    public boolean ping(String testData) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<ProductionBlock> getProductionBlocks() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean setProduction(String productionBlock, String growthProfile) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 }
