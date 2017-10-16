@@ -1,16 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Group?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" id="AnchorPane" prefHeight="600.0" prefWidth="800.0"
-            xmlns="http://javafx.com/javafx/8.0.141" fx:controller="scada.gui.MainController">
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.*?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.141"
+      fx:controller="scada.gui.MainController">
     <children>
-        <Text layoutX="155.0" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" text="WELCOEM TO SCADA">
-            <font>
-                <Font size="48.0"/>
-            </font>
-        </Text>
+        <VBox>
+            <children>
+                <Group>
+                    <children>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="DODGERBLUE" height="83.0" stroke="BLACK"
+                                   strokeType="INSIDE" width="800.0"/>
+                        <Text layoutX="116.0" layoutY="62.0" strokeType="OUTSIDE" strokeWidth="0.0"
+                              text="Vertical Farming SCADA">
+                            <font>
+                                <Font name="System Bold" size="50.0"/>
+                            </font>
+                        </Text>
+                    </children>
+                </Group>
+                <AnchorPane id="AnchorPane" prefHeight="600.0" prefWidth="800.0">
+                    <children>
+                        <Label layoutX="14.0" layoutY="14.0" text="PLC Overview">
+                            <font>
+                                <Font name="System Bold" size="20.0"/>
+                            </font>
+                        </Label>
+                        <Label layoutX="44.0" layoutY="74.0" text="IP-address">
+                            <font>
+                                <Font name="System Bold" size="15.0"/>
+                            </font>
+                        </Label>
+                        <Label layoutX="193.0" layoutY="74.0" text="Port">
+                            <font>
+                                <Font name="System Bold" size="15.0"/>
+                            </font>
+                        </Label>
+                        <Label layoutX="326.0" layoutY="74.0" text="Status">
+                            <font>
+                                <Font name="System Bold" size="15.0"/>
+                            </font>
+                        </Label>
+                        <Label fx:id="plc_ip" layoutX="44.0" layoutY="95.0" text="localhost"/>
+                        <Label fx:id="plc_port" layoutX="193.0" layoutY="95.0" text="5000"/>
+                        <Label fx:id="plc_status" layoutX="326.0" layoutY="95.0" text="NOT CHECKED"/>
+                        <Button fx:id="plc_check" layoutX="654.0" layoutY="14.0" mnemonicParsing="false"
+                                onAction="#checkPLC" text="Check PLC status"/>
+                        <ProgressIndicator fx:id="progress_indicator" layoutX="437.0" layoutY="95.0" prefHeight="21.0"
+                                           prefWidth="22.0" visible="false"/>
+                    </children>
+                </AnchorPane>
+            </children>
+        </VBox>
     </children>
-</AnchorPane>
+</HBox>
