@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane id="AnchorPane" prefHeight="200" prefWidth="320" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.111" fx:controller="scada.gui.MainController" />
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" id="AnchorPane" prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/8.0.141" fx:controller="scada.gui.MainController">
+    <children>
+        <Text layoutX="155.0" layoutY="116.0" strokeType="OUTSIDE" strokeWidth="0.0" text="WELCOEM TO SCADA">
+            <font>
+                <Font size="48.0"/>
+            </font>
+        </Text>
+    </children>
+</AnchorPane>
