@@ -12,26 +12,43 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 /**
- *
  * @author chris
  */
 public class Main extends Application {
-    
-    @Override
-    public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/Main.fxml"));
-        
-        Scene scene = new Scene(root);
-        
-        stage.setScene(scene);
-        stage.show();
-    }
 
     /**
      * @param args the command line arguments
      */
+
     public static void main(String[] args) {
         launch(args);
+
+
     }
-    
+
+    @Override
+    public void start(Stage stage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/resources/Main.fxml"));
+
+        Scene scene = new Scene(root);
+
+        stage.setScene(scene);
+        stage.show();
+
+
+/*        *//**
+         *  This is to start a new test greenhouse. It will be deleted when an actual greenhouse is in place
+         *//*
+        Thread testCon = new Thread() {
+            public void run() {
+                //PLCConnection con = new UDPConnection(23456, "localhost");
+                //Greenhouse api = new Greenhouse(con);
+                //api.SetGreenhouseStatus(200); // This means it's OK!
+                //System.out.println("Greenhouse Status is: "+api.GetGreenhouseStatus());
+
+            }
+        };
+        testCon.start(); // Starts the greenhouse through a seperate thread.
+*/
+    }
 }

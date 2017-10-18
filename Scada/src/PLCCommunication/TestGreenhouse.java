@@ -7,7 +7,6 @@
 package PLCCommunication;
 
 import API.IGreenhouse;
-import java.util.BitSet;
 
 /**
  * API tester
@@ -43,14 +42,14 @@ public class TestGreenhouse
         api.ReadTemp2();                            // bit 10
         api.SetFanSpeed(1);                         // bit 16
         api.SetTemperature(300);                    // bit 1
-        double outdoorTemperature; 
-        while (true)
-           outdoorTemperature = api.ReadTemp1();    // bit 9
-        
-        
-       
-        
-                
+        double outdoorTemperature;
+        while (true) {
+            byte[] status = api.GetStatus();
+            outdoorTemperature = api.ReadTemp1();    // bit 9
+
+        }
+
+
         //System.exit(3);
     }
     
