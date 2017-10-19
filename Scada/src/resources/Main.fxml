@@ -51,8 +51,6 @@
                         <Label fx:id="plc_status" layoutX="326.0" layoutY="95.0" text="NOT CHECKED"/>
                         <Button fx:id="plc_check" layoutX="654.0" layoutY="14.0" mnemonicParsing="false"
                                 onAction="#checkPLC" text="Check PLC status"/>
-                        <ProgressIndicator fx:id="progress_indicator" layoutX="437.0" layoutY="95.0" prefHeight="21.0"
-                                           prefWidth="22.0" visible="false"/>
                     </children>
                 </AnchorPane>
             </children>
