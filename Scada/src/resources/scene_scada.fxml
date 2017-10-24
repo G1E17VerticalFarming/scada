@@ -3,27 +3,28 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="768.0" prefWidth="1024.0" style="-fx-background-color: darkgray;"
-            xmlns="http://javafx.com/javafx/8.0.141">
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="768.0" prefWidth="1024.0"
+            style="-fx-background-color: darkgray;" xmlns="http://javafx.com/javafx/8.0.141"
+            fx:controller="scada.gui.ScadaSceneController">
     <children>
         <Label alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" text="Vertical Farming SCADA">
             <font>
                 <Font name="Arial Black" size="45.0"/>
             </font>
         </Label>
-        <Button alignment="CENTER_RIGHT" layoutX="925.0" layoutY="14.0" mnemonicParsing="false" text="Tjek Status"/>
+        <Button fx:id="buttonCheckStatus" alignment="CENTER_RIGHT" layoutX="925.0" layoutY="14.0"
+                mnemonicParsing="false" onAction="#checkStatus" text="Tjek Status"/>
         <Label layoutX="24.0" layoutY="82.0" text="PLC Overview">
             <font>
                 <Font name="Arial Black" size="20.0"/>
             </font>
         </Label>
-        <TableView layoutX="24.0" layoutY="115.0" prefHeight="492.0" prefWidth="975.0">
+        <TableView fx:id="tableviewPLC" layoutX="24.0" layoutY="115.0" prefHeight="492.0" prefWidth="975.0">
             <columns>
                 <TableColumn prefWidth="48.0" resizable="false" text="ID"/>
-                <TableColumn prefWidth="102.0" resizable="false" text="ID-Address"/>
-                <TableColumn prefWidth="75.0" resizable="false" text="Port"/>
-                <TableColumn prefWidth="75.0" resizable="false" text="Status"/>
+                <TableColumn prefWidth="129.0" resizable="false" text="ID-Address"/>
+                <TableColumn prefWidth="58.0" resizable="false" text="Port"/>
+                <TableColumn prefWidth="65.0" resizable="false" text="Status"/>
                 <TableColumn prefWidth="75.0" resizable="false" text="Temp1"/>
                 <TableColumn prefWidth="75.0" resizable="false" text="Temp2"/>
                 <TableColumn prefWidth="75.0" resizable="false" text="Moisture"/>
@@ -33,19 +34,20 @@
                 <TableColumn prefWidth="75.0" resizable="false" text="Last Check"/>
             </columns>
         </TableView>
-        <Button alignment="CENTER_RIGHT" layoutX="24.0" layoutY="729.0" mnemonicParsing="false" text="Tilføj PLC"
-                textFill="#1c9601">
+        <Button fx:id="buttonAddPLC" alignment="CENTER_RIGHT" layoutX="24.0" layoutY="729.0" mnemonicParsing="false"
+                onAction="#addPLC" text="Tilføj PLC" textFill="#1c9601">
             <font>
                 <Font name="Arial Black" size="12.0"/>
             </font>
         </Button>
-        <Button alignment="CENTER_RIGHT" layoutX="114.0" layoutY="729.0" mnemonicParsing="false" text="Fjern PLC"
-                textFill="RED">
+        <Button fx:id="buttonRemovePLC" alignment="CENTER_RIGHT" layoutX="114.0" layoutY="729.0" mnemonicParsing="false"
+                onAction="#removePLC" text="Fjern PLC" textFill="RED">
             <font>
                 <Font name="Arial Black" size="12.0"/>
             </font>
         </Button>
-        <Button alignment="CENTER_RIGHT" layoutX="875.0" layoutY="620.0" mnemonicParsing="false" text="PLC Egenskaber">
+        <Button fx:id="buttonOpenPLC" alignment="CENTER_RIGHT" layoutX="875.0" layoutY="620.0" mnemonicParsing="false"
+                onAction="#openPLC" text="PLC Egenskaber">
             <font>
                 <Font name="Arial Black" size="12.0"/>
             </font>
