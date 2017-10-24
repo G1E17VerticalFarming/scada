@@ -8,17 +8,20 @@ package PLCCommunication;
 
 import API.IGreenhouse;
 
+import java.io.Serializable;
 import java.util.BitSet;
 
 /**
  * API to communicate to the PLC
  * @author Steffen Skov
  */
-public class PLC implements IGreenhouse, ICommands
+public class PLC implements IGreenhouse, ICommands, Serializable
 {
     private PLCConnection conn;
     private Message mess;
     private int status;
+    private String ipaddress;
+    private int portnumber;
     
      
     /**
@@ -382,5 +385,20 @@ public class PLC implements IGreenhouse, ICommands
         return false;
    
     }
-    
+
+    public String getIpaddress() {
+        return ipaddress;
+    }
+
+    public void setIpaddress(String ipaddress) {
+        this.ipaddress = ipaddress;
+    }
+
+    public int getPortnumber() {
+        return portnumber;
+    }
+
+    public void setPortnumber(int portnumber) {
+        this.portnumber = portnumber;
+    }
 }
