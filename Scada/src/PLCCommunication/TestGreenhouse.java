@@ -20,7 +20,7 @@ public class TestGreenhouse {
         //PLCConnection con = new SerialConnection("COM4");
         //SerialConnection.getPortList("COM1");
 
-        IGreenhouse api = new Greenhouse(con);
+        IGreenhouse api = new PLC(con);
 //        while(true){
 //            int i = 0;
 //            for(;i <= 100;i++){

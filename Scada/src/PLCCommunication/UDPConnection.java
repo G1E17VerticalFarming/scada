@@ -7,12 +7,8 @@
 package PLCCommunication;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
+import java.io.Serializable;
+import java.net.*;
 
 /**
  * Connect and communicate with ABB PLC via UDP
@@ -20,7 +16,7 @@ import java.net.UnknownHostException;
  * PC must have a fixes address at same subnet ex. 192.168.0.100
  * @author Steffen Skov
  */
-public class UDPConnection extends PLCConnection implements IMessage
+public class UDPConnection extends PLCConnection implements IMessage, Serializable
 {
     private InetAddress adr = null;
     private int port;
@@ -130,7 +126,7 @@ public class UDPConnection extends PLCConnection implements IMessage
             mess.answer = a;
             if (a[DIRECTION] == FROMPLC) // Dicard own message
             {
-                System.out.println("Data recieved:" + answerDP.getLength() + " byte " + a[0]+ "," + a[1]+ "," + a[2] + "," + a[3] + "," + a[10] + ".....");
+                System.out.println("Data received:" + answerDP.getLength() + " byte " + a[0] + "," + a[1] + "," + a[2] + "," + a[3] + "," + a[10] + ".....");
                 if (!mess.answerIsValid())
                 {
                     mess.answer = answerDP.getData();

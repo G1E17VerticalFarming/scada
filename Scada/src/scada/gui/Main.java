@@ -22,17 +22,16 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
-
-
     }
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/Main.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_scada.fxml"));
 
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
+        stage.setResizable(false);
         stage.show();
 
 
@@ -42,9 +41,9 @@ public class Main extends Application {
         Thread testCon = new Thread() {
             public void run() {
                 //PLCConnection con = new UDPConnection(23456, "localhost");
-                //Greenhouse api = new Greenhouse(con);
+                //PLC api = new PLC(con);
                 //api.SetGreenhouseStatus(200); // This means it's OK!
-                //System.out.println("Greenhouse Status is: "+api.GetGreenhouseStatus());
+                //System.out.println("PLC Status is: "+api.GetGreenhouseStatus());
 
             }
         };

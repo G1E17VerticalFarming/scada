@@ -5,7 +5,10 @@
  */
 package scada.gui;
 
-import PLCCommunication.Greenhouse;
+import API.IGreenhouse;
+import PLCCommunication.PLC;
+import PLCCommunication.PLCConnection;
+import PLCCommunication.UDPConnection;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -19,7 +22,7 @@ import java.util.ResourceBundle;
 /**
  * @author chris
  */
-public class MainController implements Initializable {
+public class ScadaSceneController implements Initializable {
 
     @FXML
     private Label plc_ip, plc_port, plc_status;
@@ -29,29 +32,33 @@ public class MainController implements Initializable {
 
     private boolean check = false;
 
-    Greenhouse api = new Greenhouse();
+    PLCConnection con = new UDPConnection(5000, "localhost");
+    IGreenhouse api = new PLC(con);
 
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         Scada scada = new Scada();
-        api.SetGreenhouseStatus(200); // This means it's OK!
+
     }
 
     public synchronized void checkPLC(ActionEvent actionEvent) throws InterruptedException {
         check = true;
+        api.ReadTemp1();
+        //api.ReadTemp2();
+        //api.GetStatus();
+        //api.ReadTemp2();
 
-
-        plc_status.setText("Checking...");
-        System.out.println("Greenhouse Status is: " + api.GetGreenhouseStatus());
+        //plc_status.setText("Checking...");
+        //System.out.println("PLC Status is: " + api.GetGreenhouseStatus());
 
         // TODO: 16-10-2017 MAKE IT POSSIBLE TO CHECK THE STATUS OF A PLC BY SIMPLE PING OR SOMETHING
 
-        if (api.GetGreenhouseStatus() == 200) {
+        /*if (api.GetGreenhouseStatus() == 200) {
             plc_status.setText("OK!");
         } else {
             plc_status.setText("NOT OK");
-        }
+        }*/
 
     }
 }

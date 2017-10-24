@@ -14,7 +14,7 @@ import java.util.BitSet;
  * API to communicate to the PLC
  * @author Steffen Skov
  */
-public class Greenhouse implements IGreenhouse, ICommands
+public class PLC implements IGreenhouse, ICommands
 {
     private PLCConnection conn;
     private Message mess;
@@ -24,7 +24,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     /**
      * Create greenhouse API
      */
-    public Greenhouse()
+    public PLC()
     {
            
     }
@@ -33,14 +33,14 @@ public class Greenhouse implements IGreenhouse, ICommands
      * Create greenhouse API
      * @param c connection
      */
-    public Greenhouse(PLCConnection c)
+    public PLC(PLCConnection c)
     {
             this.conn = c;           
     }
     
          
     /**
-     * Setpoint for temperature inside Greenhouse
+     * Setpoint for temperature inside PLC
      * CMD: 1
      * @param kelvin : temperature in kelvin (273 > T > 303)
      * @return true if processed
@@ -60,7 +60,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Setpoint for moisture inside Greenhouse
+     * Setpoint for moisture inside PLC
      * CMD:2
      * @param moist in % ( 10 > M > 90 )
      * @return true if processed
@@ -78,7 +78,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Setpoint for red light inside Greenhouse
+     * Setpoint for red light inside PLC
      * CMD:3
      * @param level in percent
      * @return true if processed
@@ -97,7 +97,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Setpoint for blue light inside Greenhouse
+     * Setpoint for blue light inside PLC
      * CMD: 4
      * @param level in percent
      * @return true if processed
@@ -160,7 +160,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Read tempature inside the Greenhouse
+     * Read tempature inside the PLC
      * CMD:9
      * @return Temperature in kelvin
      */
@@ -184,7 +184,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Read tempature outside the Greenhouse
+     * Read tempature outside the PLC
      * CMD: 10
      * @return Temperature in kelvin
      */
@@ -210,7 +210,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }
     
     /**
-     * Read relative moisture inside the Greenhouse
+     * Read relative moisture inside the PLC
      * CMD: 11
      * @return Moisture in %
      */
@@ -234,7 +234,7 @@ public class Greenhouse implements IGreenhouse, ICommands
     }  
     
     /**
-     * Read level of water in the Greenhouse
+     * Read level of water in the PLC
      * CMD: 17
      * @return Level in millimeter [0 < level < 250]
      */
@@ -381,14 +381,6 @@ public class Greenhouse implements IGreenhouse, ICommands
         }
         return false;
    
-    }
-
-    public void SetGreenhouseStatus(int temp) {
-        this.status = temp;
-    }
-
-    public int GetGreenhouseStatus() {
-        return this.status;
     }
     
 }
