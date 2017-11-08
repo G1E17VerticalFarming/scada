@@ -8,8 +8,14 @@ package PLCCommunication;
 
 import API.IGreenhouse;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * API to communicate to the PLC
@@ -17,11 +23,13 @@ import java.util.BitSet;
  */
 public class PLC implements IGreenhouse, ICommands, Serializable
 {
-    private PLCConnection conn;
-    private Message mess;
-    private int status;
+    private static final long serialVersionUID = 1L;
+    transient private UDPConnection conn;
+    transient private Message mess;
     private String ipaddress;
     private int portnumber;
+    transient private int status;
+    private String fileName = "Scada/src/resources/PLClist.dat";
     
      
     /**
@@ -36,9 +44,9 @@ public class PLC implements IGreenhouse, ICommands, Serializable
      * Create greenhouse API
      * @param c connection
      */
-    public PLC(PLCConnection c)
+    public PLC(UDPConnection c)
     {
-            this.conn = c;           
+        this.conn = c;
     }
     
          
@@ -302,23 +310,19 @@ public class PLC implements IGreenhouse, ICommands, Serializable
         }
         System.out.println("Alarm state is: " + alarms);
         return alarms;
-    }  
-    
-    
-    private BitSet fillBitSet(byte [] al)
-    {      
-        BitSet alarms = new BitSet(32); 
-        if (true)
-        {
-            if (al != null && al.length == 4)
-                for (int i = 0; i<4; i++)
-                    for (int b =0; b<8; b++)
-                    {
-                        int ib = (al[i]>>b)&0x1;
-                        Boolean bit;
-                        bit = ib == 1;
-                        alarms.set(i*8+b, bit);
-                    }
+    }
+
+
+    private BitSet fillBitSet(byte[] al) {
+        BitSet alarms = new BitSet(32);
+        if (al != null && al.length == 4) {
+            for (int i = 0; i < 4; i++)
+                for (int b = 0; b < 8; b++) {
+                    int ib = (al[i] >> b) & 0x1;
+                    Boolean bit;
+                    bit = ib == 1;
+                    alarms.set(i * 8 + b, bit);
+                }
         }
         System.out.println("Alarms in set state: " + alarms);
         return alarms;
@@ -327,7 +331,6 @@ public class PLC implements IGreenhouse, ICommands, Serializable
     /**
      * Reset one alarm
      * CMD: 14
-     * @param errorNum
      * @return Done
      */
     public boolean ResetError(int errorNum)
@@ -361,7 +364,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable
         {
             result = mess.getResultData();
         }
-        System.out.println("State is: " + result);
+        System.out.println("State is: " + Arrays.toString(result));
         return result;
     }
 
@@ -400,5 +403,20 @@ public class PLC implements IGreenhouse, ICommands, Serializable
 
     public void setPortnumber(int portnumber) {
         this.portnumber = portnumber;
+    }
+
+    protected List<PLC> get() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.fileName))) {
+            return (List<PLC>) ois.readObject();
+        } catch (IOException e) {
+            // Ignored
+        } catch (ClassNotFoundException | ClassCastException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
+
+    public String toString() {
+        return "IP:" + ipaddress + "\nPort: " + portnumber;
     }
 }
