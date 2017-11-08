@@ -20,7 +20,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import scada.domain.IScada;
 import scada.domain.Scada;
 import scada.persistence.ProductionBlock;
 
@@ -31,8 +30,8 @@ import java.util.ResourceBundle;
 
 
 public class SceneScadaController implements Initializable {
-    private IScada scada = new Scada();
-    private ObservableList PLCTable;
+    private Scada scada = new Scada();
+    private ObservableList<ProductionBlock> PLCTable;
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
@@ -47,6 +46,12 @@ public class SceneScadaController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
+            ArrayList<ProductionBlock> list = new ArrayList<>();
+            ProductionBlock plc1 = new ProductionBlock(1, "10.10.0.1", 5000);
+            ProductionBlock plc2 = new ProductionBlock(2, "localhost", 5001);
+            list.add(plc1);
+            list.add(plc2);
+            scada.writePLCFile(list);
             populateListView();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -75,6 +80,10 @@ public class SceneScadaController implements Initializable {
     public synchronized void openPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
+        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_plcview.fxml"));
+        Scene scene = new Scene(root);
+
+        stageAddPLC.setScene(scene);
         stageAddPLC.initStyle(StageStyle.UTILITY);
         stageAddPLC.showAndWait();
 

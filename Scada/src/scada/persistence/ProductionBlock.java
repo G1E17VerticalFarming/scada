@@ -31,7 +31,7 @@ public class ProductionBlock implements Serializable {
     }
 
     public ArrayList readPLCFile() throws IOException, ClassNotFoundException {
-        FileInputStream fi;
+        FileInputStream fi = null;
         ObjectInputStream in = null;
         String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
         ArrayList<ProductionBlock> list = new ArrayList<>();
@@ -78,15 +78,15 @@ public class ProductionBlock implements Serializable {
         f.close();
     }
 
-    private String getIpaddress() {
+    public String getIpaddress() {
         return ipaddress;
     }
 
-    private int getPort() {
+    public int getPort() {
         return port;
     }
 
-    private int getId() {
+    public int getId() {
         return id;
     }
 }
