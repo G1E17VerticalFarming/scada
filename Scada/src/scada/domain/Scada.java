@@ -5,15 +5,21 @@
  */
 package scada.domain;
 
-import API.IScadaFacade;
+import scada.persistence.ProductionBlock;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import shared.ProductionBlock;
 
 /**
- *
  * @author chris
  */
-public class Scada implements IScadaFacade {
+public class Scada implements IScada {
+    private static Scada scada = new Scada();
+    private ProductionBlock prodBlock = new ProductionBlock();
+
+    public Scada() {
+    }
 
     @Override
     public boolean ping(String testData) {
@@ -21,7 +27,7 @@ public class Scada implements IScadaFacade {
     }
 
     @Override
-    public List<ProductionBlock> getProductionBlocks() {
+    public List<shared.ProductionBlock> getProductionBlocks() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -29,5 +35,20 @@ public class Scada implements IScadaFacade {
     public boolean setProduction(String productionBlock, String growthProfile) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    @Override
+    public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
+        prodBlock.writePLCFile(plcList);
+    }
+
+    @Override
+    public ArrayList readPLCFile() throws IOException, ClassNotFoundException {
+        ArrayList list;
+        list = prodBlock.readPLCFile();
+        return list;
+    }
+
+    public Scada getInstance() {
+        return scada;
+    }
 }
