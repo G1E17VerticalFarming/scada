@@ -30,7 +30,7 @@ import java.util.ResourceBundle;
 
 
 public class SceneScadaController implements Initializable {
-    private Scada scada = new Scada();
+    Scada scada = new Scada().getInstance();
     private ObservableList<ProductionBlock> PLCTable;
 
     @FXML
@@ -46,12 +46,12 @@ public class SceneScadaController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            ArrayList<ProductionBlock> list = new ArrayList<>();
-            ProductionBlock plc1 = new ProductionBlock(1, "10.10.0.1", 5000);
-            ProductionBlock plc2 = new ProductionBlock(2, "localhost", 5001);
+            /*ArrayList<ProductionBlock> list = new ArrayList<>();
+            ProductionBlock plc1 = new ProductionBlock(1, "10.10.0.1", 5000, "Test1");
+            ProductionBlock plc2 = new ProductionBlock(2, "localhost", 5001, "Lokalt drivhus");
             list.add(plc1);
             list.add(plc2);
-            scada.writePLCFile(list);
+            scada.writePLCFile(list);*/
             populateListView();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -65,6 +65,7 @@ public class SceneScadaController implements Initializable {
         PLC_ID.setCellValueFactory(new PropertyValueFactory<>("id"));
         PLC_IP.setCellValueFactory(new PropertyValueFactory<>("ipaddress"));
         PLC_port.setCellValueFactory(new PropertyValueFactory<>("port"));
+        PLC_name.setCellValueFactory(new PropertyValueFactory<>("name"));
 
         tableviewPLC.setItems(null);
         tableviewPLC.setItems(PLCTable);
@@ -103,9 +104,12 @@ public class SceneScadaController implements Initializable {
         populateListView();
     }
 
-    public synchronized void removePLC(ActionEvent actionEvent) {
-        //api.ReadTemp1();
-        // TODO: 08-11-2017 Add functionality
-        System.out.println("You removed a PLC...");
+    public synchronized void removePLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        if (tableviewPLC.getSelectionModel().getSelectedItem() != null) {
+            ProductionBlock selectedPLC = (ProductionBlock) tableviewPLC.getSelectionModel().getSelectedItem();
+            scada.removePLC(selectedPLC);
+            System.out.println("You are removing ID: " + selectedPLC.getId());
+        }
+
     }
 }

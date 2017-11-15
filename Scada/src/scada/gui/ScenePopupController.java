@@ -11,8 +11,12 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import scada.domain.Scada;
+import scada.persistence.ProductionBlock;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 /**
@@ -21,28 +25,46 @@ import java.util.ResourceBundle;
  * @author mads
  */
 public class ScenePopupController implements Initializable {
+    Scada scada = new Scada().getInstance();
 
     @FXML
-    private TextField nameTextField;
+    private TextField nameTextField, IPTextField, portTextField;
     @FXML
-    private TextField IPTextField;
-    @FXML
-    private TextField portTextField;
-    @FXML
-    private Button addButton;
-    @FXML
-    private Button cancelButton;
+    private Button addButton, cancelButton;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // TODO
-    }    
+
+    }
 
     @FXML
-    private void handleAddButtonAction(ActionEvent event) {
+    private void handleAddButtonAction(ActionEvent event) throws IOException, ClassNotFoundException {
+        Stage stage = (Stage) addButton.getScene().getWindow();
+        ArrayList plcList = scada.readPLCFile();
+        ProductionBlock newestPLC = (ProductionBlock) plcList.get(plcList.size() - 1);
+        int newestPLCID = newestPLC.getId() + 1;
+        String IP = IPTextField.getText().trim();
+        String name = nameTextField.getText().trim();
+        int port = 0;
+        try {
+            port = Integer.parseInt(portTextField.getText().trim());
+        } catch (NumberFormatException ex) {
+            System.out.println("A number was not input as port.");
+        }
+
+        if (!IP.isEmpty() && !name.isEmpty() && port > 1024 && port < 65536) {
+            ProductionBlock plc = new ProductionBlock(newestPLCID, IP, port, name);
+            System.out.println("Added PLC - " + plc.toString());
+            plcList.add(plc);
+            scada.writePLCFile(plcList);
+            stage.close();
+        } else {
+            System.out.println("You done did something wrong!");
+        }
+
     }
 
     @FXML
@@ -50,5 +72,5 @@ public class ScenePopupController implements Initializable {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
-    
+
 }

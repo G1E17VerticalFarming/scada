@@ -15,11 +15,9 @@ import java.util.List;
  * @author chris
  */
 public class Scada implements IScada {
-    private static Scada scada = new Scada();
-    private ProductionBlock prodBlock = new ProductionBlock();
 
-    public Scada() {
-    }
+    private ProductionBlock prodBlock = new ProductionBlock();
+    private static Scada scada = new Scada();
 
     @Override
     public boolean ping(String testData) {
@@ -46,6 +44,17 @@ public class Scada implements IScada {
         ArrayList list;
         list = prodBlock.readPLCFile();
         return list;
+    }
+
+    @Override
+    public void removePLC(ProductionBlock plcToRemove) throws IOException, ClassNotFoundException {
+        ArrayList list;
+        list = prodBlock.readPLCFile();
+        if (list.contains(plcToRemove)) {
+            System.out.println("PLC found");
+        } else {
+            System.out.println("PLC not found");
+        }
     }
 
     public Scada getInstance() {

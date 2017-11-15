@@ -12,6 +12,7 @@ public class ProductionBlock implements Serializable {
     private Date estimatedDone;
     private int growthConfigId;
     private int plantType;
+    private String name;
     private String ipaddress;
     private int port;
     private int id;
@@ -20,14 +21,15 @@ public class ProductionBlock implements Serializable {
 
     }
 
-    public ProductionBlock(int ID, String ip, int port) {
-        this.ipaddress = ip;
-        this.port = port;
-        this.id = ID;
+    public ProductionBlock(int ID, String ip, int port, String name) {
+        this.setIpaddress(ip);
+        this.setPort(port);
+        this.setId(ID);
+        this.setName(name);
     }
 
     public String toString() {
-        return "ID: " + getId() + "\t\tIP: " + getIpaddress() + "\tPort: " + getPort();
+        return "ID: " + getId() + "\t\tIP: " + getIpaddress() + "\tPort: " + getPort() + "\tName: " + getName();
     }
 
     public ArrayList readPLCFile() throws IOException, ClassNotFoundException {
@@ -52,7 +54,6 @@ public class ProductionBlock implements Serializable {
         while (in != null) {
             try {
                 ProductionBlock plc = (ProductionBlock) in.readObject();
-                System.out.println("Object found: " + plc.toString());
                 list.add(plc);
             } catch (SocketTimeoutException exc) {
                 // you got the timeout
@@ -88,5 +89,25 @@ public class ProductionBlock implements Serializable {
 
     public int getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setIpaddress(String ipaddress) {
+        this.ipaddress = ipaddress;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
