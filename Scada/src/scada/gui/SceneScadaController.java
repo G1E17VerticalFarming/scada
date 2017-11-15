@@ -5,6 +5,10 @@
  */
 package scada.gui;
 
+import PLCCommunication.PLC;
+import PLCCommunication.UDPConnection;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -38,9 +42,11 @@ public class SceneScadaController implements Initializable {
     @FXML
     private TableView tableviewPLC;
     @FXML
-    private TableColumn<ProductionBlock, Integer> PLC_ID, PLC_port, PLC_temp1, PLC_temp2, PLC_fanspeed;
+    private TableColumn<ProductionBlock, Integer> PLC_ID, PLC_port;
     @FXML
-    private TableColumn<ProductionBlock, String> PLC_IP, PLC_status, PLC_moisture, PLC_ETA, PLC_lastOK, PLC_lastCheck, PLC_name;
+    private TableColumn PLC_temp1, PLC_temp2, PLC_moisture;
+    @FXML
+    private TableColumn<ProductionBlock, String> PLC_IP, PLC_status, PLC_ETA, PLC_lastOK, PLC_lastCheck, PLC_name;
 
 
     @Override
@@ -52,6 +58,7 @@ public class SceneScadaController implements Initializable {
             list.add(plc1);
             list.add(plc2);
             scada.writePLCFile(list);*/
+
             populateListView();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -67,15 +74,26 @@ public class SceneScadaController implements Initializable {
         PLC_port.setCellValueFactory(new PropertyValueFactory<>("port"));
         PLC_name.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-        tableviewPLC.setItems(null);
         tableviewPLC.setItems(PLCTable);
         System.out.println("PLC List loaded.");
     }
 
     public synchronized void checkStatus(ActionEvent actionEvent) {
-        //plc5000.ReadTemp1();
-        // TODO: 08-11-2017 Add functionality
-        System.out.println("You checked the status of PLC ");
+        for (ProductionBlock plc : PLCTable) {
+            System.out.println("Port: " + plc.getPort() + " IP: " + plc.getIpaddress());
+            PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
+            double temp1 = plccomm.ReadTemp1();
+            double temp2 = plccomm.ReadTemp2();
+            double moisture = plccomm.ReadMoist();
+
+
+            PLC_temp1.setCellValueFactory(c -> new SimpleDoubleProperty(temp1));
+            PLC_temp2.setCellValueFactory(c -> new SimpleDoubleProperty(temp2));
+            PLC_moisture.setCellValueFactory(c -> new SimpleDoubleProperty(moisture));
+            PLC_status.setCellValueFactory(c -> new SimpleStringProperty("OK"));
+        }
+        tableviewPLC.refresh();
+        System.out.println("You checked the status of the PLC's ");
     }
 
     public synchronized void openPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
@@ -107,8 +125,8 @@ public class SceneScadaController implements Initializable {
     public synchronized void removePLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
         if (tableviewPLC.getSelectionModel().getSelectedItem() != null) {
             ProductionBlock selectedPLC = (ProductionBlock) tableviewPLC.getSelectionModel().getSelectedItem();
-            scada.removePLC(selectedPLC);
-            System.out.println("You are removing ID: " + selectedPLC.getId());
+            scada.removePLC(selectedPLC.getId());
+            populateListView();
         }
 
     }

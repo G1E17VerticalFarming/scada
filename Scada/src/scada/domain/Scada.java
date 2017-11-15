@@ -9,6 +9,7 @@ import scada.persistence.ProductionBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -47,13 +48,18 @@ public class Scada implements IScada {
     }
 
     @Override
-    public void removePLC(ProductionBlock plcToRemove) throws IOException, ClassNotFoundException {
+    public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
         ArrayList list;
         list = prodBlock.readPLCFile();
-        if (list.contains(plcToRemove)) {
-            System.out.println("PLC found");
-        } else {
-            System.out.println("PLC not found");
+
+        Iterator<ProductionBlock> it = list.iterator();
+        while (it.hasNext()) {
+            ProductionBlock plc = it.next();
+            if (plc.getId() == plcToRemove) {
+                System.out.println("Removing ID: " + plcToRemove);
+                it.remove();
+                prodBlock.writePLCFile(list);
+            }
         }
     }
 

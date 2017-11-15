@@ -11,5 +11,5 @@ public interface IScada extends IScadaFacade {
 
     ArrayList readPLCFile() throws IOException, ClassNotFoundException;
 
-    void removePLC(ProductionBlock plcToRemove) throws IOException, ClassNotFoundException;
+    void removePLC(int plcToRemove) throws IOException, ClassNotFoundException;
 }

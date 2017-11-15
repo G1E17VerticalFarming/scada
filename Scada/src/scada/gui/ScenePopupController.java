@@ -44,11 +44,20 @@ public class ScenePopupController implements Initializable {
     private void handleAddButtonAction(ActionEvent event) throws IOException, ClassNotFoundException {
         Stage stage = (Stage) addButton.getScene().getWindow();
         ArrayList plcList = scada.readPLCFile();
-        ProductionBlock newestPLC = (ProductionBlock) plcList.get(plcList.size() - 1);
-        int newestPLCID = newestPLC.getId() + 1;
+        int newestPLCID;
+        int port = 0;
         String IP = IPTextField.getText().trim();
         String name = nameTextField.getText().trim();
-        int port = 0;
+
+        // FIND HIGHEST ID OF PLC'S
+        if (plcList.size() == 0) {
+            newestPLCID = 1;
+        } else {
+            ProductionBlock newestPLC = (ProductionBlock) plcList.get(plcList.size() - 1);
+            newestPLCID = newestPLC.getId() + 1;
+        }
+
+        // GET PORT NUMBER
         try {
             port = Integer.parseInt(portTextField.getText().trim());
         } catch (NumberFormatException ex) {
