@@ -57,15 +57,15 @@ public class HttpOkhttpPostSend {
         return response.body().string();
     }*/
     
-    public static String doPostRequest(String url, String json) throws IOException {
+    public static <T> String doPostRequest(String url, T obj) throws IOException {
         OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(JSON, json);
+        RequestBody body = RequestBody.create(JSON, Json.stringifyObject(obj));
         Request request = new Request.Builder()
                 .url(url)
                 .post(body)
                 .build();
         Response response = client.newCall(request).execute();
-        return response.body().string();
+        return response.code() + ": " + response.body().string();
     }
     
     public static <T> T doGetRequest(String url, Class<T> classType) throws IOException {
