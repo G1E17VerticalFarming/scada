@@ -5,14 +5,16 @@
  */
 package scada.gui;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  * FXML Controller class
@@ -48,6 +50,8 @@ public class ScenePLCView implements Initializable {
 
     @FXML
     private void handleGoBackButtonAction(ActionEvent event) {
+        Stage stage = (Stage) goBackButton.getScene().getWindow();
+        stage.close();
     }
     
 }
