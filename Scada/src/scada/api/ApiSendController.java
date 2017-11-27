@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import shared.ProductionBlock;
 import shared.GrowthProfile;
-import shared.Log;
+//import shared.Log;
 
 /**
  *
@@ -63,7 +63,7 @@ public class ApiSendController {
         return gp;
     }
     
-    public String saveLog(Log log) {
+    /*public String saveLog(Log log) {
         String returnStr;
         try {
             returnStr = HttpOkhttpPostSend.doPostRequest("http://localhost:8080/production_block/", log);
@@ -72,5 +72,5 @@ public class ApiSendController {
             return "not success";
         }
         return returnStr;
-    }
+    }*/
 }

@@ -80,7 +80,7 @@ public class SceneScadaController implements Initializable {
     public synchronized void openPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_plcview.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_plcview.fxml"));
         Scene scene = new Scene(root);
 
         stageAddPLC.setScene(scene);
@@ -93,7 +93,7 @@ public class SceneScadaController implements Initializable {
     public synchronized void addPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_popup.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_popup.fxml"));
         Scene scene = new Scene(root);
 
         stageAddPLC.setScene(scene);

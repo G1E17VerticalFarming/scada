@@ -14,18 +14,18 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    public static void main(String[] args) {
+    public static void mainMethod(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_scada.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_scada.fxml"));
 
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
-        stage.getIcons().add(new Image(Main.class.getResourceAsStream("/resources/icon.png")));
+        //stage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
         stage.setTitle("Vertical Farming SCADA");
         stage.setResizable(false);
         stage.show();
