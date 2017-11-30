@@ -11,14 +11,28 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import scada.persistence.FileHandler;
 
 /**
  * @author chris
  */
 public class Scada implements IScada {
+    
+    private ReadWriteProductionBlock readWriteProductionBlock;
+    
+    private static Scada instance = null;
 
-    private ProductionBlock prodBlock = new ProductionBlock();
-    private static Scada scada = new Scada();
+    protected Scada() {
+        this.readWriteProductionBlock = FileHandler.getInstance();
+        // Is here to prevent instantiation
+    }
+
+    public static Scada getInstance() {
+        if (instance == null) {
+            instance = new Scada();
+        }
+        return instance;
+    }
 
     @Override
     public boolean ping(String testData) {
@@ -37,20 +51,18 @@ public class Scada implements IScada {
 
     @Override
     public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
-        prodBlock.writePLCFile(plcList);
+        this.readWriteProductionBlock.writePLCFile(plcList);
     }
 
     @Override
-    public ArrayList readPLCFile() throws IOException, ClassNotFoundException {
-        ArrayList list;
-        list = prodBlock.readPLCFile();
+    public ArrayList<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException {
+        ArrayList<ProductionBlock> list = new ArrayList<>(this.readWriteProductionBlock.readPLCFile());
         return list;
     }
 
     @Override
     public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
-        ArrayList list;
-        list = prodBlock.readPLCFile();
+        ArrayList<ProductionBlock> list = new ArrayList<>(this.readWriteProductionBlock.readPLCFile());
 
         Iterator<ProductionBlock> it = list.iterator();
         while (it.hasNext()) {
@@ -58,12 +70,8 @@ public class Scada implements IScada {
             if (plc.getId() == plcToRemove) {
                 System.out.println("Removing ID: " + plcToRemove);
                 it.remove();
-                prodBlock.writePLCFile(list);
+                this.readWriteProductionBlock.writePLCFile(list);
             }
         }
-    }
-
-    public Scada getInstance() {
-        return scada;
     }
 }

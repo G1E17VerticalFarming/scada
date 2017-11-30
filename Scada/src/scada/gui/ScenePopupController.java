@@ -25,7 +25,7 @@ import java.util.ResourceBundle;
  * @author mads
  */
 public class ScenePopupController implements Initializable {
-    Scada scada = new Scada().getInstance();
+    private Scada scada;
 
     @FXML
     private TextField nameTextField, IPTextField, portTextField;
@@ -37,7 +37,7 @@ public class ScenePopupController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        this.scada = Scada.getInstance();
     }
 
     @FXML

@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
 
 
 public class SceneScadaController implements Initializable {
-    Scada scada = new Scada().getInstance();
+    private Scada scada;
     private ObservableList<ProductionBlock> PLCTable;
 
     @FXML
@@ -49,6 +49,7 @@ public class SceneScadaController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        this.scada = Scada.getInstance();
         try {
             /*ArrayList<ProductionBlock> list = new ArrayList<>();
             ProductionBlock plc1 = new ProductionBlock(1, "10.10.0.1", 5000, "Test1");
@@ -78,7 +79,7 @@ public class SceneScadaController implements Initializable {
         PLC_status.setCellValueFactory(new PropertyValueFactory("OK"));
 
         tableviewPLC.setItems(PLCTable);
-        System.out.println("PLC List loaded.");
+        System.out.println("PLC List loaded. WARNING: it is possible to make it here, without having loaded a valid list!!!");
     }
 
     public synchronized void checkStatus(ActionEvent actionEvent) throws IOException {

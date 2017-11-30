@@ -21,7 +21,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Scada scada = new Scada();
+        
         Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_scada.fxml"));
 
         Scene scene = new Scene(root);
