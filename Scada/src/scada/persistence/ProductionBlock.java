@@ -67,7 +67,7 @@ public class ProductionBlock implements Serializable {
         ObjectInputStream in = null;
         
         ArrayList<ProductionBlock> list = new ArrayList<>();
-
+        
         try {
             fi = new FileInputStream(new File(this.path));
             if (fi.getChannel().size() > 0) {
