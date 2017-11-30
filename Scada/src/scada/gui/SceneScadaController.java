@@ -7,8 +7,6 @@ package scada.gui;
 
 import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -67,31 +65,58 @@ public class SceneScadaController implements Initializable {
 
     private void populateListView() throws ClassNotFoundException, IOException {
         ArrayList plcList = scada.readPLCFile();
+
         PLCTable = FXCollections.observableArrayList(plcList);
 
         PLC_ID.setCellValueFactory(new PropertyValueFactory<>("id"));
         PLC_IP.setCellValueFactory(new PropertyValueFactory<>("ipaddress"));
         PLC_port.setCellValueFactory(new PropertyValueFactory<>("port"));
         PLC_name.setCellValueFactory(new PropertyValueFactory<>("name"));
+        PLC_temp1.setCellValueFactory(new PropertyValueFactory("temp1"));
+        PLC_temp2.setCellValueFactory(new PropertyValueFactory("temp2"));
+        PLC_moisture.setCellValueFactory(new PropertyValueFactory("moisture"));
+        PLC_status.setCellValueFactory(new PropertyValueFactory("OK"));
 
         tableviewPLC.setItems(PLCTable);
         System.out.println("PLC List loaded.");
     }
 
-    public synchronized void checkStatus(ActionEvent actionEvent) {
-        for (ProductionBlock plc : PLCTable) {
-            System.out.println("Port: " + plc.getPort() + " IP: " + plc.getIpaddress());
-            PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
+    public synchronized void checkStatus(ActionEvent actionEvent) throws IOException {
+        ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
+
+        for (Object plc : tableviewPLC.getItems()) {
+            ProductionBlock currentPLC = (ProductionBlock) plc;
+            System.out.println("Checking status of " + currentPLC.getIpaddress() + ":" + currentPLC.getPort());
+
+            PLC plccomm = new PLC(new UDPConnection(currentPLC.getPort(), currentPLC.getIpaddress()));
+
+            // Check status of PLC
             double temp1 = plccomm.ReadTemp1();
-            double temp2 = plccomm.ReadTemp2();
-            double moisture = plccomm.ReadMoist();
+
+            if (temp1 == -1) { // No connection to PLC
+                currentPLC.setTemp1(-1);
+                currentPLC.setTemp2(-1);
+                currentPLC.setMoisture(-1);
+                currentPLC.setStatus(-1);
+                currentPLC.setFanspeed(-1);
+                // currentPLC.setEta();
+            } else if (temp1 == -2) { // Error in returned data
+                currentPLC.setTemp1(-2);
+                currentPLC.setTemp2(-2);
+                currentPLC.setMoisture(-2);
+            } else {
+
+            }
+
+            // Set status on PLC object
 
 
-            PLC_temp1.setCellValueFactory(c -> new SimpleDoubleProperty(temp1));
-            PLC_temp2.setCellValueFactory(c -> new SimpleDoubleProperty(temp2));
-            PLC_moisture.setCellValueFactory(c -> new SimpleDoubleProperty(moisture));
-            PLC_status.setCellValueFactory(c -> new SimpleStringProperty("OK"));
+            //(plccomm.ReadTemp2());
+            currentPLC.setMoisture(plccomm.ReadMoist());
+
+            newStatusList.add(currentPLC);
         }
+        scada.writePLCFile(newStatusList);
         tableviewPLC.refresh();
         System.out.println("You checked the status of the PLC's ");
     }

@@ -174,16 +174,16 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public double ReadTemp1() {
         System.out.println("Read greenhouse temperatur ");
         mess = new Message(READ_GREENHOUSE_TEMP);
-        double temp = 0.0;
+        double temp = -1;
         mess.setData(); //None data
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 temp = (double) (mess.getResultData())[0];
             else
-                temp = 01.99; // return a dummy value
+                temp = -2; // return a dummy value
         }
-        System.out.println("Temperature is: " + temp + " celcius");
+        System.out.println("TESTTemperature is: " + temp + " celcius");
         return temp;
     }
 
@@ -196,14 +196,14 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public double ReadTemp2() {
         System.out.println("Read outdoor temperatur ");
         mess = new Message(READ_OUTDOOR_TEMP);
-        double temp2 = 0.0;
+        double temp2 = -1;
         mess.setData(); //None data
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 temp2 = (double) (mess.getResultData())[0];
             else
-                temp2 = 01.99; // return a dummy value
+                temp2 = -2; // return a dummy value
         }
         System.out.println("Temperature is: " + temp2);
         return temp2;
@@ -219,14 +219,14 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public double ReadMoist() {
         System.out.println("Read outdoor temperatur ");
         mess = new Message(READ_MOISTURE);
-        double moist = 0.0;
+        double moist = -1;
         mess.setData(); //None data
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 moist = (double) (mess.getResultData())[0];
             else
-                moist = 1.0; // return a dummy value
+                moist = -2; // return a dummy value
             // In real world moist will never be so low
         }
         System.out.println("Moisture is: " + moist + " %");

@@ -16,6 +16,14 @@ public class ProductionBlock implements Serializable {
     private String ipaddress;
     private int port;
     private int id;
+    private double temp1;
+    private double temp2;
+    private int fanspeed;
+    private double moisture;
+    private String eta;
+    private String lastOK;
+    private String lastCheck;
+
 
     public ProductionBlock() {
 
@@ -36,6 +44,11 @@ public class ProductionBlock implements Serializable {
         FileInputStream fi = null;
         ObjectInputStream in = null;
         String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
+        String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
+        String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
+        System.out.println(new File(filename).getAbsolutePath());
+        System.out.println(new File(filename1).getAbsolutePath());
+        System.out.println(new File(filename2).getAbsolutePath());
         ArrayList<ProductionBlock> list = new ArrayList<>();
 
         try {
@@ -149,5 +162,61 @@ public class ProductionBlock implements Serializable {
 
     public void setPlantType(int plantType) {
         this.plantType = plantType;
+    }
+
+    public double getTemp1() {
+        return temp1;
+    }
+
+    public void setTemp1(double temp1) {
+        this.temp1 = temp1;
+    }
+
+    public double getTemp2() {
+        return temp2;
+    }
+
+    public void setTemp2(double temp2) {
+        this.temp2 = temp2;
+    }
+
+    public int getFanspeed() {
+        return fanspeed;
+    }
+
+    public void setFanspeed(int fanspeed) {
+        this.fanspeed = fanspeed;
+    }
+
+    public double getMoisture() {
+        return moisture;
+    }
+
+    public void setMoisture(double moisture) {
+        this.moisture = moisture;
+    }
+
+    public String getEta() {
+        return eta;
+    }
+
+    public void setEta(String eta) {
+        this.eta = eta;
+    }
+
+    public String getLastOK() {
+        return lastOK;
+    }
+
+    public void setLastOK(String lastOK) {
+        this.lastOK = lastOK;
+    }
+
+    public String getLastCheck() {
+        return lastCheck;
+    }
+
+    public void setLastCheck(String lastCheck) {
+        this.lastCheck = lastCheck;
     }
 }
