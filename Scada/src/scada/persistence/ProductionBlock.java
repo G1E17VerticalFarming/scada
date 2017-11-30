@@ -2,6 +2,9 @@ package scada.persistence;
 
 import java.io.*;
 import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -23,13 +26,32 @@ public class ProductionBlock implements Serializable {
     private String eta;
     private String lastOK;
     private String lastCheck;
+    
+    private String path;
 
 
-    public ProductionBlock() {
+    public ProductionBlock() throws FileNotFoundException {
 
+        String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
+        String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
+        String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
+        
+        File fileTest = new File("Scada");
+        File fileTest1 = new File("/src");
+        File fileTest2 = new File("src");
+        if(fileTest.exists()) {
+            this.path = filename;
+        } else if(fileTest1.exists()) {
+            this.path = filename1;
+        } else if(fileTest2.exists()) {
+            this.path = filename2;
+        } else {
+            throw new FileNotFoundException("There was no valid paths found!");
+        }
     }
 
-    public ProductionBlock(int ID, String ip, int port, String name) {
+    public ProductionBlock(int ID, String ip, int port, String name) throws FileNotFoundException {
+        this();
         this.setIpaddress(ip);
         this.setPort(port);
         this.setId(ID);
@@ -43,16 +65,11 @@ public class ProductionBlock implements Serializable {
     public ArrayList readPLCFile() throws IOException, ClassNotFoundException {
         FileInputStream fi = null;
         ObjectInputStream in = null;
-        String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
-        String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
-        String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
-        System.out.println(new File(filename).getAbsolutePath());
-        System.out.println(new File(filename1).getAbsolutePath());
-        System.out.println(new File(filename2).getAbsolutePath());
+        
         ArrayList<ProductionBlock> list = new ArrayList<>();
 
         try {
-            fi = new FileInputStream(new File(filename));
+            fi = new FileInputStream(new File(this.path));
             if (fi.getChannel().size() > 0) {
                 in = new ObjectInputStream(fi); //Initiates the files content into ObjectInputStream
             }
@@ -60,7 +77,7 @@ public class ProductionBlock implements Serializable {
                 System.out.println("No PLC objects found.");
             }
         } catch (FileNotFoundException e) {
-            System.out.println(filename + " blev ikke fundet.");
+            System.out.println(this.path + " blev ikke fundet.");
         }
 
 
@@ -70,12 +87,15 @@ public class ProductionBlock implements Serializable {
                 list.add(plc);
             } catch (SocketTimeoutException exc) {
                 // you got the timeout
+                break;
             } catch (EOFException exc) {
                 in.close();
                 in = null;
+                break;
             } catch (IOException exc) {
                 // some other I/O error: print it, log it, etc.
                 exc.printStackTrace(); // for example
+                break;
             }
         }
 
@@ -83,7 +103,7 @@ public class ProductionBlock implements Serializable {
     }
 
     public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
-        FileOutputStream f = new FileOutputStream(new File("Scada/src/resources/PLClist.dat"));
+        FileOutputStream f = new FileOutputStream(new File(this.path));
         ObjectOutputStream out = new ObjectOutputStream(f);
         for (ProductionBlock plc : plcList) {
             out.writeObject(plc);
