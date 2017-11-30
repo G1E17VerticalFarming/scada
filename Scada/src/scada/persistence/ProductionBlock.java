@@ -44,13 +44,7 @@ public class ProductionBlock implements Serializable {
         FileInputStream fi = null;
         ObjectInputStream in = null;
         String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
-        String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
-        String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
-        System.out.println(new File(filename).getAbsolutePath());
-        System.out.println(new File(filename1).getAbsolutePath());
-        System.out.println(new File(filename2).getAbsolutePath());
         ArrayList<ProductionBlock> list = new ArrayList<>();
-
         try {
             fi = new FileInputStream(new File(filename));
             if (fi.getChannel().size() > 0) {
