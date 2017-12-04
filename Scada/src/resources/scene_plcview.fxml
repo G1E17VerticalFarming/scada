@@ -15,26 +15,26 @@
         <Label layoutX="262.0" layoutY="149.0" prefHeight="21.0" prefWidth="119.0" text="Moisture SetPoint"/>
         <Label layoutX="389.0" layoutY="151.0" prefHeight="16.0" prefWidth="72.0" text="Red Light"/>
         <Label layoutX="491.0" layoutY="150.0" prefHeight="16.0" prefWidth="72.0" text="Light Blue"/>
-        <Spinner fx:id="temp1Spinner" amountToStepBy="1" layoutX="24.0" layoutY="187.0" max="100" min="0"
-                 prefHeight="26.0" prefWidth="72.0"/>
-        <Spinner fx:id="moistureSpinner" amountToStepBy="1" layoutX="264.0" layoutY="188.0" max="89" min="11"
-                 prefHeight="26.0" prefWidth="72.0"/>
-        <Spinner fx:id="lightRedSpinner" amountToStepBy="5" layoutX="389.0" layoutY="188.0" max="100" min="0"
-                 prefHeight="26.0" prefWidth="72.0"/>
-        <Spinner fx:id="lightBlueSpinner" amountToStepBy="5" layoutX="491.0" layoutY="187.0" max="100" min="0"
-                 prefHeight="26.0" prefWidth="72.0"/>
+        <Spinner fx:id="temp1Spinner" amountToStepBy="1" editable="true" layoutX="24.0" layoutY="187.0" max="100"
+                 min="0" prefHeight="26.0" prefWidth="72.0"/>
+        <Spinner fx:id="moistureSpinner" amountToStepBy="1" editable="true" layoutX="264.0" layoutY="188.0" max="89"
+                 min="11" prefHeight="26.0" prefWidth="72.0"/>
+        <Spinner fx:id="lightRedSpinner" amountToStepBy="5" editable="true" layoutX="389.0" layoutY="188.0" max="100"
+                 min="0" prefHeight="26.0" prefWidth="72.0"/>
+        <Spinner fx:id="lightBlueSpinner" amountToStepBy="5" editable="true" layoutX="491.0" layoutY="187.0" max="100"
+                 min="0" prefHeight="26.0" prefWidth="72.0"/>
         <Label layoutX="14.0" layoutY="27.0" text="PLC ID:"/>
         <Label layoutX="99.0" layoutY="192.0" text="°celsius"/>
-        <RadioButton layoutX="165.0" layoutY="175.0" mnemonicParsing="false" selected="true" text="Off"
-                     fx:id="radioOff">
+        <RadioButton fx:id="radioOff" layoutX="165.0" layoutY="175.0" mnemonicParsing="false" selected="true"
+                     text="Off">
             <toggleGroup>
                 <ToggleGroup fx:id="fanspeed"/>
             </toggleGroup>
         </RadioButton>
-        <RadioButton layoutX="165.0" layoutY="200.0" mnemonicParsing="false" text="Low" toggleGroup="$fanspeed"
-                     fx:id="radioLow"/>
-        <RadioButton layoutX="165.0" layoutY="225.0" mnemonicParsing="false" text="High" toggleGroup="$fanspeed"
-                     fx:id="radioHigh"/>
+        <RadioButton fx:id="radioLow" layoutX="165.0" layoutY="200.0" mnemonicParsing="false" text="Low"
+                     toggleGroup="$fanspeed"/>
+        <RadioButton fx:id="radioHigh" layoutX="165.0" layoutY="225.0" mnemonicParsing="false" text="High"
+                     toggleGroup="$fanspeed"/>
         <Label layoutX="343.0" layoutY="192.0" text="\%"/>
         <Label layoutX="469.0" layoutY="192.0" text="\%"/>
         <Label layoutX="569.0" layoutY="192.0" text="\%"/>

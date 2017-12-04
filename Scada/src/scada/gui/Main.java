@@ -11,7 +11,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import scada.domain.Scada;
 
 public class Main extends Application {
 
@@ -21,7 +20,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        
+
         Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_scada.fxml"));
 
         Scene scene = new Scene(root);
@@ -31,5 +30,6 @@ public class Main extends Application {
         stage.setTitle("Vertical Farming SCADA");
         stage.setResizable(false);
         stage.show();
+        stage.setOnHidden(e -> SceneScadaController.shutdown());
     }
 }

@@ -195,7 +195,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Temperature in kelvin
      */
     public double ReadTemp2() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read outdoor temperature");
         mess = new Message(READ_OUTDOOR_TEMP);
         double temp2 = -1;
         mess.setData(); //None data
@@ -218,7 +218,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Moisture in %
      */
     public double ReadMoist() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read moisture");
         mess = new Message(READ_MOISTURE);
         double moist = -1;
         mess.setData(); //None data
