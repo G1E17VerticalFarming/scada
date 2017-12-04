@@ -8,7 +8,8 @@ package scada.domain;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import scada.persistence.ProductionBlock;
+//import scada.persistence.ProductionBlock;
+import shared.ProductionBlock;
 
 /**
  *

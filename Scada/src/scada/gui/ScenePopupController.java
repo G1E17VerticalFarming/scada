@@ -12,7 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import scada.domain.Scada;
-import scada.persistence.ProductionBlock;
+import shared.ProductionBlock;
 
 import java.io.IOException;
 import java.net.URL;

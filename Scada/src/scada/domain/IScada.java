@@ -1,7 +1,8 @@
 package scada.domain;
 
 import API.IScadaFacade;
-import scada.persistence.ProductionBlock;
+//import scada.persistence.ProductionBlock;
+import shared.ProductionBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;
