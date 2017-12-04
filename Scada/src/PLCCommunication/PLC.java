@@ -60,7 +60,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public boolean SetTemperature(int temp) {
         int kelvin = temp + 273;
         mess = new Message(TEMP_SETPOINT);
-        if (kelvin > 273 && kelvin < 303) // 0 - 30 grader celcius
+        if (kelvin >= 273 && kelvin <= 303) // 0 - 30 grader celcius
         {
             System.out.println("Set temperatur setpoint to " + kelvin);
             mess.setData(kelvin - 273);

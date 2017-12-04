@@ -73,6 +73,7 @@ public class SceneScadaController implements Initializable {
         ArrayList plcList = scada.readPLCFile();
 
         PLCTable = FXCollections.observableArrayList(plcList);
+        int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
 
         PLC_ID.setCellValueFactory(new PropertyValueFactory<>("id"));
         PLC_IP.setCellValueFactory(new PropertyValueFactory<>("ipaddress"));
@@ -84,8 +85,10 @@ public class SceneScadaController implements Initializable {
         PLC_status.setCellValueFactory(new PropertyValueFactory("status"));
         PLC_lastCheck.setCellValueFactory(new PropertyValueFactory("lastCheck"));
         PLC_lastOK.setCellValueFactory(new PropertyValueFactory("lastOK"));
+        PLC_ETA.setCellValueFactory(new PropertyValueFactory("estimatedDone"));
 
         tableviewPLC.setItems(PLCTable);
+        tableviewPLC.getSelectionModel().select(currentSelectionIndex);
         System.out.println("PLC's loaded (if any)");
     }
 
@@ -155,7 +158,6 @@ public class SceneScadaController implements Initializable {
                     currentPLC.setStatus("OK");
                     currentPLC.setLastOK("" + ft.format(dNow));
                 }
-                System.out.println("CURRENT TIME: " + ft.format(dNow));
                 currentPLC.setLastCheck("" + ft.format(dNow));
 
 
