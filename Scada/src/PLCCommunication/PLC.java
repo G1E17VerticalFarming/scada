@@ -218,16 +218,16 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Moisture in %
      */
     public double ReadMoist() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read moisture ");
         mess = new Message(READ_MOISTURE);
-        double moist = -1;
+        double moist = -1.0;
         mess.setData(); //None data
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 moist = (double) (mess.getResultData())[0];
             else
-                moist = -2; // return a dummy value
+                moist = -2.0; // return a dummy value
             // In real world moist will never be so low
         }
         System.out.println("Moisture is: " + moist + " %");

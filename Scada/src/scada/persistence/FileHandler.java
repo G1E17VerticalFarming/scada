@@ -104,16 +104,20 @@ public class FileHandler implements ReadWriteProductionBlock {
         String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
         String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
         String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
-
+        String filename3 = "scada/Scada/src/resources/PLClist.dat";
+        System.out.println(new File(filename1).getAbsolutePath());
         File fileTest = new File("Scada");
         File fileTest1 = new File("/src");
         File fileTest2 = new File("src");
+        File fileTest3 = new File(filename3);
         if (fileTest.exists()) {
             return filename;
         } else if (fileTest1.exists()) {
             return filename1;
         } else if (fileTest2.exists()) {
             return filename2;
+        } else if (fileTest3.exists()) {
+            return filename3;
         } else {
             throw new FileNotFoundException("There was no valid paths found!");
         }
