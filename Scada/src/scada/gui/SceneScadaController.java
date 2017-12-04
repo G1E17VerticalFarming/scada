@@ -71,7 +71,7 @@ public class SceneScadaController implements Initializable {
         PLC_status.setCellValueFactory(new PropertyValueFactory("OK"));
 
         tableviewPLC.setItems(PLCTable);
-        System.out.println("PLC List loaded. WARNING: it is possible to make it here, without having loaded a valid list!!!");
+        System.out.println("PLC's loaded (if any)");
     }
 
     public synchronized void checkStatus() throws IOException {
