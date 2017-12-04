@@ -60,7 +60,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public boolean SetTemperature(int temp) {
         int kelvin = temp + 273;
         mess = new Message(TEMP_SETPOINT);
-        if (kelvin > 273 && kelvin < 303) // 0 - 30 grader celcius
+        if (kelvin >= 273 && kelvin <= 303) // 0 - 30 grader celcius
         {
             System.out.println("Set temperatur setpoint to " + kelvin);
             mess.setData(kelvin - 273);
@@ -195,7 +195,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Temperature in kelvin
      */
     public double ReadTemp2() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read outdoor temperature");
         mess = new Message(READ_OUTDOOR_TEMP);
         double temp2 = -1;
         mess.setData(); //None data
@@ -218,7 +218,11 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Moisture in %
      */
     public double ReadMoist() {
+<<<<<<< HEAD
         System.out.println("Read moisture ");
+=======
+        System.out.println("Read moisture");
+>>>>>>> 25edca319c8bb8bc34d115b9ed2478f9a3192252
         mess = new Message(READ_MOISTURE);
         double moist = -1.0;
         mess.setData(); //None data
