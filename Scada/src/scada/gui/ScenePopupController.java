@@ -5,7 +5,6 @@
  */
 package scada.gui;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -25,7 +24,7 @@ import java.util.ResourceBundle;
  * @author mads
  */
 public class ScenePopupController implements Initializable {
-    private Scada scada;
+    private Scada scada = Scada.getInstance();
 
     @FXML
     private TextField nameTextField, IPTextField, portTextField;
@@ -41,7 +40,7 @@ public class ScenePopupController implements Initializable {
     }
 
     @FXML
-    private void handleAddButtonAction(ActionEvent event) throws IOException, ClassNotFoundException {
+    private void handleAddButtonAction() throws IOException, ClassNotFoundException {
         Stage stage = (Stage) addButton.getScene().getWindow();
         ArrayList plcList = scada.readPLCFile();
         int newestPLCID;
@@ -77,9 +76,14 @@ public class ScenePopupController implements Initializable {
     }
 
     @FXML
-    private void handleCancelButtonAction(ActionEvent event) {
+    private void handleCancelButtonAction() {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
+    }
+
+    @FXML
+    private void onEnter() throws IOException, ClassNotFoundException {
+        handleAddButtonAction();
     }
 
 }

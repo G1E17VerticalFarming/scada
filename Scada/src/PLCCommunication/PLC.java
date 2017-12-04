@@ -53,13 +53,14 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * Setpoint for temperature inside PLC
      * CMD: 1
      *
-     * @param kelvin : temperature in kelvin (273 > T > 303)
+     * @param temp : temperature in celsius (0 < T > 30)
      * @return true if processed
      */
 
-    public boolean SetTemperature(int kelvin) {
+    public boolean SetTemperature(int temp) {
+        int kelvin = temp + 273;
         mess = new Message(TEMP_SETPOINT);
-        if (kelvin > 273 && kelvin < 303) // 0 - 30 grader celcius
+        if (kelvin >= 273 && kelvin <= 303) // 0 - 30 grader celcius
         {
             System.out.println("Set temperatur setpoint to " + kelvin);
             mess.setData(kelvin - 273);
@@ -183,7 +184,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
             else
                 temp = -2; // return a dummy value
         }
-        System.out.println("TESTTemperature is: " + temp + " celcius");
+        System.out.println("Temperature is: " + temp + " celcius");
         return temp;
     }
 
@@ -194,7 +195,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Temperature in kelvin
      */
     public double ReadTemp2() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read outdoor temperature");
         mess = new Message(READ_OUTDOOR_TEMP);
         double temp2 = -1;
         mess.setData(); //None data
@@ -217,16 +218,16 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Moisture in %
      */
     public double ReadMoist() {
-        System.out.println("Read outdoor temperatur ");
+        System.out.println("Read moisture ");
         mess = new Message(READ_MOISTURE);
-        double moist = -1;
+        double moist = -1.0;
         mess.setData(); //None data
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 moist = (double) (mess.getResultData())[0];
             else
-                moist = -2; // return a dummy value
+                moist = -2.0; // return a dummy value
             // In real world moist will never be so low
         }
         System.out.println("Moisture is: " + moist + " %");
