@@ -5,19 +5,20 @@
  */
 package scada.domain;
 
+import scada.persistence.ProductionBlock;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import scada.persistence.ProductionBlock;
 
 /**
  *
  * @author DanielToft
  */
 public interface ReadWriteProductionBlock {
-    
-    public abstract List<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException;
-    
-    public abstract void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException;
+
+    List<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException;
+
+    void writePLCToFile(ArrayList<ProductionBlock> plcList) throws IOException;
     
 }

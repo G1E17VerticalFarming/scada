@@ -9,7 +9,6 @@ import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -32,13 +31,13 @@ import java.util.ResourceBundle;
 
 
 public class SceneScadaController implements Initializable {
-    private Scada scada;
+    private Scada scada = Scada.getInstance();
     private ObservableList<ProductionBlock> PLCTable;
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
     @FXML
-    private TableView tableviewPLC;
+    private TableView<ProductionBlock> tableviewPLC;
     @FXML
     private TableColumn<ProductionBlock, Integer> PLC_ID, PLC_port;
     @FXML
@@ -51,13 +50,6 @@ public class SceneScadaController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         this.scada = Scada.getInstance();
         try {
-            /*ArrayList<ProductionBlock> list = new ArrayList<>();
-            ProductionBlock plc1 = new ProductionBlock(1, "10.10.0.1", 5000, "Test1");
-            ProductionBlock plc2 = new ProductionBlock(2, "localhost", 5001, "Lokalt drivhus");
-            list.add(plc1);
-            list.add(plc2);
-            scada.writePLCFile(list);*/
-
             populateListView();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -82,7 +74,7 @@ public class SceneScadaController implements Initializable {
         System.out.println("PLC List loaded. WARNING: it is possible to make it here, without having loaded a valid list!!!");
     }
 
-    public synchronized void checkStatus(ActionEvent actionEvent) throws IOException {
+    public synchronized void checkStatus() throws IOException {
         ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
 
         for (Object plc : tableviewPLC.getItems()) {
@@ -100,20 +92,18 @@ public class SceneScadaController implements Initializable {
                 currentPLC.setMoisture(-1);
                 currentPLC.setStatus(-1);
                 currentPLC.setFanspeed(-1);
-                // currentPLC.setEta();
             } else if (temp1 == -2) { // Error in returned data
                 currentPLC.setTemp1(-2);
                 currentPLC.setTemp2(-2);
                 currentPLC.setMoisture(-2);
+                currentPLC.setStatus(-2);
+                currentPLC.setFanspeed(-2);
             } else {
-
+                currentPLC.setTemp1(temp1);
+                currentPLC.setTemp2(plccomm.ReadTemp2());
+                currentPLC.setMoisture(plccomm.ReadMoist());
             }
 
-            // Set status on PLC object
-
-
-            //(plccomm.ReadTemp2());
-            currentPLC.setMoisture(plccomm.ReadMoist());
 
             newStatusList.add(currentPLC);
         }
@@ -122,11 +112,18 @@ public class SceneScadaController implements Initializable {
         System.out.println("You checked the status of the PLC's ");
     }
 
-    public synchronized void openPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+    public synchronized void openPLC() throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_plcview.fxml"));
+
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/resources/scene_plcview.fxml"));
+        final Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
+
+        ScenePLCView controller = fxmlLoader.getController();
+        System.out.println("Passing object: " + tableviewPLC.getSelectionModel().getSelectedItem().getName());
+        ProductionBlock plc = tableviewPLC.getSelectionModel().getSelectedItem();
+        controller.populatePLC(plc);
 
         stageAddPLC.setScene(scene);
         stageAddPLC.initStyle(StageStyle.UTILITY);
@@ -135,7 +132,7 @@ public class SceneScadaController implements Initializable {
         populateListView();
     }
 
-    public synchronized void addPLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+    public synchronized void addPLC() throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
         Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_popup.fxml"));
@@ -148,9 +145,9 @@ public class SceneScadaController implements Initializable {
         populateListView();
     }
 
-    public synchronized void removePLC(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+    public synchronized void removePLC() throws IOException, ClassNotFoundException {
         if (tableviewPLC.getSelectionModel().getSelectedItem() != null) {
-            ProductionBlock selectedPLC = (ProductionBlock) tableviewPLC.getSelectionModel().getSelectedItem();
+            ProductionBlock selectedPLC = tableviewPLC.getSelectionModel().getSelectedItem();
             scada.removePLC(selectedPLC.getId());
             populateListView();
         }

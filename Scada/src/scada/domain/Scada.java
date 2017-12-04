@@ -5,13 +5,13 @@
  */
 package scada.domain;
 
+import scada.persistence.FileHandler;
 import scada.persistence.ProductionBlock;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import scada.persistence.FileHandler;
 
 /**
  * @author chris
@@ -51,7 +51,7 @@ public class Scada implements IScada {
 
     @Override
     public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
-        this.readWriteProductionBlock.writePLCFile(plcList);
+        this.readWriteProductionBlock.writePLCToFile(plcList);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class Scada implements IScada {
             if (plc.getId() == plcToRemove) {
                 System.out.println("Removing ID: " + plcToRemove);
                 it.remove();
-                this.readWriteProductionBlock.writePLCFile(list);
+                this.readWriteProductionBlock.writePLCToFile(list);
             }
         }
     }

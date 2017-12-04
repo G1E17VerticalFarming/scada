@@ -1,6 +1,6 @@
 package scada.persistence;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.Date;
 
 public class ProductionBlock implements Serializable {
@@ -18,7 +18,6 @@ public class ProductionBlock implements Serializable {
     private double temp2;
     private int fanspeed;
     private double moisture;
-    private String eta;
     private String lastOK;
     private String lastCheck;
 
@@ -141,14 +140,6 @@ public class ProductionBlock implements Serializable {
 
     public void setMoisture(double moisture) {
         this.moisture = moisture;
-    }
-
-    public String getEta() {
-        return eta;
-    }
-
-    public void setEta(String eta) {
-        this.eta = eta;
     }
 
     public String getLastOK() {

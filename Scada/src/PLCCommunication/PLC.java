@@ -53,11 +53,12 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * Setpoint for temperature inside PLC
      * CMD: 1
      *
-     * @param kelvin : temperature in kelvin (273 > T > 303)
+     * @param temp : temperature in celsius (0 < T > 30)
      * @return true if processed
      */
 
-    public boolean SetTemperature(int kelvin) {
+    public boolean SetTemperature(int temp) {
+        int kelvin = temp + 273;
         mess = new Message(TEMP_SETPOINT);
         if (kelvin > 273 && kelvin < 303) // 0 - 30 grader celcius
         {
@@ -183,7 +184,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
             else
                 temp = -2; // return a dummy value
         }
-        System.out.println("TESTTemperature is: " + temp + " celcius");
+        System.out.println("Temperature is: " + temp + " celcius");
         return temp;
     }
 
