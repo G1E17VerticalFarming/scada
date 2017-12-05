@@ -113,6 +113,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return true if processed
      */
     public boolean SetBlueLight(int level) {
+        System.out.println("Set blue light to " + level);
         mess = new Message(BLUELIGHT_SETPOINT);
         if (level >= 0 && level <= 100) {
             mess.setData(level);
@@ -132,6 +133,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      */
     public boolean AddWater(int sec) {
         if (sec >= 0 && sec < 120) {
+            System.out.println("Add water for " + sec + " seconds");
             mess = new Message(ADDWATER);
             mess.setData(sec);
             conn.addMessage(mess);
@@ -173,7 +175,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Temperature in kelvin
      */
     public double ReadTemp1() {
-        System.out.println("Read greenhouse temperatur ");
+        System.out.println("Read greenhouse temperature");
         mess = new Message(READ_GREENHOUSE_TEMP);
         double temp = -1;
         mess.setData(); //None data
@@ -218,7 +220,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Moisture in %
      */
     public double ReadMoist() {
-        System.out.println("Read moisture ");
+        System.out.println("Read moisture");
         mess = new Message(READ_MOISTURE);
         double moist = -1.0;
         mess.setData(); //None data
@@ -241,7 +243,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * @return Level in millimeter [0 < level < 250]
      */
     public double ReadWaterLevel() {
-        System.out.println("Read water level ");
+        System.out.println("Read water level");
         mess = new Message(READ_WATER_LEVEL);
         double level = 0.0; // level
         mess.setData(); //None data

@@ -15,7 +15,6 @@ import shared.ProductionBlock;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 /**
@@ -41,33 +40,27 @@ public class ScenePopupController implements Initializable {
 
     @FXML
     private void handleAddButtonAction() throws IOException, ClassNotFoundException {
-        Stage stage = (Stage) addButton.getScene().getWindow();
-        ArrayList plcList = scada.readPLCFile();
-        int newestPLCID;
         int port = 0;
         String IP = IPTextField.getText().trim();
         String name = nameTextField.getText().trim();
 
-        // FIND HIGHEST ID OF PLC'S
-        if (plcList.size() == 0) {
-            newestPLCID = 1;
-        } else {
-            ProductionBlock newestPLC = (ProductionBlock) plcList.get(plcList.size() - 1);
-            newestPLCID = newestPLC.getId() + 1;
-        }
-
         // GET PORT NUMBER
         try {
             port = Integer.parseInt(portTextField.getText().trim());
+
         } catch (NumberFormatException ex) {
             System.out.println("A number was not input as port.");
         }
 
         if (!IP.isEmpty() && !name.isEmpty() && port > 1024 && port < 65536) {
-            ProductionBlock plc = new ProductionBlock(newestPLCID, IP, port, name);
-            System.out.println("Added PLC - " + plc.toString());
-            plcList.add(plc);
-            scada.writePLCFile(plcList);
+            ProductionBlock plc = new ProductionBlock();
+            plc.setPort(port);
+            plc.setIpaddress(IP);
+            plc.setName(name);
+            System.out.println("Added PLC " + plc.getName() + " - " + plc.getIpaddress() + ":" + plc.getPort());
+            scada.savePLC(plc);
+
+            Stage stage = (Stage) addButton.getScene().getWindow();
             stage.close();
         } else {
             System.out.println("You done did something wrong!");

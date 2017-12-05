@@ -5,12 +5,10 @@
  */
 package scada.persistence;
 
-import scada.domain.IScadaDatabaseFacade;
-
 /**
  *
  * @author chris
  */
-public class DatabaseHandler implements IScadaDatabaseFacade{
+public class DatabaseHandler {
     
 }

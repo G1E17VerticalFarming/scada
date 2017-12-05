@@ -5,35 +5,25 @@
  */
 package scada.persistence;
 
-import java.awt.BorderLayout;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import scada.domain.ReadWriteProductionBlock;
 import shared.ProductionBlock;
 
+import java.io.*;
+import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 /**
- *
  * @author DanielToft
  */
 public class FileHandler implements ReadWriteProductionBlock {
-    
+
     String PLCListPath;
-    
+
     private static FileHandler instance = null;
-    
+
     private FileHandler() {
         try {
             this.PLCListPath = this.findPLCListPath();
@@ -49,20 +39,20 @@ public class FileHandler implements ReadWriteProductionBlock {
         }
         return instance;
     }
-    
+
 
     @Override
-    public List<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException {
-        if(this.PLCListPath.isEmpty()) {
+    public List<ProductionBlock> readPLCFile() throws IOException {
+        if (this.PLCListPath.isEmpty()) {
             System.out.println("Error: could not read PLClist file as there is found no valid path!");
             return null;
         }
-        
+
         FileInputStream fi = null;
         ObjectInputStream in = null;
-        
+
         ArrayList<ProductionBlock> list = new ArrayList<>();
-        
+
         try {
             fi = new FileInputStream(new File(this.PLCListPath));
             if (fi.getChannel().size() > 0) {
@@ -91,6 +81,8 @@ public class FileHandler implements ReadWriteProductionBlock {
                 // some other I/O error: print it, log it, etc.
                 System.out.println("Error: " + exc);
                 break;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
             }
         }
 
@@ -98,12 +90,12 @@ public class FileHandler implements ReadWriteProductionBlock {
     }
 
     @Override
-    public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
-        if(this.PLCListPath.isEmpty()) {
+    public void savePLC(ArrayList<ProductionBlock> plcList) throws IOException {
+        if (this.PLCListPath.isEmpty()) {
             System.out.println("Error: could not write PLClist file as there is found no valid path!");
             return;
         }
-        
+
         FileOutputStream f = new FileOutputStream(new File(this.PLCListPath));
         ObjectOutputStream out = new ObjectOutputStream(f);
         for (ProductionBlock plc : plcList) {
@@ -112,24 +104,71 @@ public class FileHandler implements ReadWriteProductionBlock {
         out.close();
         f.close();
     }
-    
+
+    @Override
+    public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
+        ArrayList<ProductionBlock> list = new ArrayList<>(readPLCFile());
+        boolean found = false;
+        int highestID = 0;
+
+        for (ProductionBlock currentPLC : list) {
+            if (currentPLC.getId() > highestID) {
+                highestID = currentPLC.getId();
+            }
+
+            if (currentPLC.getId() == plc.getId()) { //IF PLC ALREADY EXISTS
+                currentPLC.setName(plc.getName());
+                currentPLC.setIpaddress(plc.getIpaddress());
+                currentPLC.setPort(plc.getPort());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            plc.setId(highestID + 1);
+            list.add(plc);
+        }
+
+        savePLC(list);
+    }
+
+    @Override
+    public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
+        if (this.PLCListPath.isEmpty()) {
+            System.out.println("Error: could not write PLClist file as there is found no valid path!");
+            return;
+        }
+
+        ArrayList<ProductionBlock> list = new ArrayList<>(readPLCFile());
+
+        Iterator<ProductionBlock> it = list.iterator();
+        while (it.hasNext()) {
+            ProductionBlock plc = it.next();
+            if (plc.getId() == plcToRemove) {
+                System.out.println("Removing ID: " + plcToRemove);
+                it.remove();
+                this.savePLC(list);
+            }
+        }
+    }
+
     private String findPLCListPath() throws FileNotFoundException {
         String filename = "Scada/src/resources/PLClist.dat"; //File containing the PLC's as objects
         String filename1 = "/src/resources/PLClist.dat"; //File containing the PLC's as objects
         String filename2 = "src/resources/PLClist.dat"; //File containing the PLC's as objects
-        
+
         File fileTest = new File("Scada");
         File fileTest1 = new File("/src");
         File fileTest2 = new File("src");
-        if(fileTest.exists()) {
+        if (fileTest.exists()) {
             return filename;
-        } else if(fileTest1.exists()) {
+        } else if (fileTest1.exists()) {
             return filename1;
-        } else if(fileTest2.exists()) {
+        } else if (fileTest2.exists()) {
             return filename2;
         } else {
             throw new FileNotFoundException("There was no valid paths found!");
         }
     }
-    
+
 }
