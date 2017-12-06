@@ -132,13 +132,8 @@ public class Scada implements IScada {
 
             for (ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
-                GrowthProfile selectedGp;
-                if(pb.getManualGrowthConfigId() > 0) {
-                    selectedGp = this.gpMap.get(pb.getGrowthConfigId());
-                } else {
-                    selectedGp = this.gpMap.get(pb.getManualGrowthConfigId());
-                }
-                //Probalby should check whether selectedGp is null
+                GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
+                
                 AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
                 if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
@@ -253,6 +248,15 @@ public class Scada implements IScada {
             this.readWriteLog.writeLogFile(this.logList);
         } catch (IOException ex) {
             System.out.println(ex);
+        }
+    }
+    
+    public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
+        //Probalby should check whether selectedGp is null
+        if(pb.getManualGrowthConfigId() > 0) {
+            return this.gpMap.get(pb.getGrowthConfigId());
+        } else {
+            return this.gpMap.get(pb.getManualGrowthConfigId());
         }
     }
 }
