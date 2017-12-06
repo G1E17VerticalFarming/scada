@@ -20,7 +20,9 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import scada.domain.interfaces.ReadWriteGrowthProfile;
@@ -46,6 +48,8 @@ public class Scada implements IScada {
 
     private HashMap<Integer, ProductionBlock> pbMap;
     private HashMap<Integer, GrowthProfile> gpMap;
+    private HashMap<Integer, GrowthProfile> manualGPMap;
+    private ArrayList<Log> logList;
     private boolean continueAutomation = true;
     
     private int debugCount = 0;
@@ -59,7 +63,12 @@ public class Scada implements IScada {
         // Local variables
         this.pbMap = new HashMap<>();
         this.gpMap = new HashMap<>();
+        this.manualGPMap = new HashMap<>();
+        this.logList = new ArrayList<>();
         this.initiateTimedAutomationTask(20000);
+        
+        //Debugs
+        this.debugAdd();
     }
 
     @Override
@@ -82,6 +91,7 @@ public class Scada implements IScada {
         readWriteProductionBlock.savePLC(plcList);
     }
 
+    @Override
     public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
         this.readWriteProductionBlock.savePLC(plc);
     }
@@ -122,7 +132,14 @@ public class Scada implements IScada {
 
             for (ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
-                AutomationProcess ap = new AutomationProcess(pb, this.gpMap.get(pb.getGrowthConfigId()), secondsSinceMidnight);
+                GrowthProfile selectedGp;
+                if(pb.getManualGrowthConfigId() > 0) {
+                    selectedGp = this.gpMap.get(pb.getGrowthConfigId());
+                } else {
+                    selectedGp = this.gpMap.get(pb.getManualGrowthConfigId());
+                }
+                //Probalby should check whether selectedGp is null
+                AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
                 if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
                 } else {
@@ -137,36 +154,6 @@ public class Scada implements IScada {
         // pbArr = API.getBlaBlaBla();
 
         // For debug
-        this.gpMap.put(1, new GrowthProfile());
-        this.gpMap.get(1).setId(1);
-        ArrayList<Light> lightList = new ArrayList<>();
-        lightList.add(new Light());
-        lightList.get(0).setId(0);
-        lightList.get(0).setType(3);
-        lightList.get(0).setPowerLevel(100);
-        lightList.get(0).setRunTimeUnix(43200);
-        this.gpMap.get(1).setLightSequence(lightList);
-        this.gpMap.get(1).setMoisture(50);
-        this.gpMap.get(1).setName("testing gp");
-        this.gpMap.get(1).setNightTemperature(15);
-        this.gpMap.get(1).setTemperature(25);
-        this.gpMap.get(1).setWaterLevel(20);
-        
-        try {
-            this.readWriteGrowthProfile.writeGrowthProfileFile(new ArrayList<>(this.gpMap.values()));
-        } catch (IOException ex) {
-            System.out.println(ex);
-        }
-        
-        List<Log> logList = new ArrayList<>();
-        logList.add(new Log());
-        logList.get(0).setValue("testing cunts");
-        logList.get(0).setCmd(27);
-        try {
-            this.readWriteLog.writeLogFile(logList);
-        } catch(IOException ex) {
-            System.out.println(ex);
-        }
         
         System.out.println("Updating pbMap");
         ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
@@ -174,6 +161,98 @@ public class Scada implements IScada {
         
         for(int i = 0; i < pbArr.length; i++) {
             this.pbMap.put(pbArr[i].getId(), pbArr[i]);
+        }
+    }
+    
+    public void debugAdd() {
+        // Fetch list from MES, if not, just use what you have
+        // pbArr = API.getBlaBlaBla();
+
+        // For debug
+        List<GrowthProfile> gpList = new ArrayList<>();
+        gpList.add(new GrowthProfile());
+        gpList.get(0).setId(1);
+        ArrayList<Light> lightList = new ArrayList<>();
+        lightList.add(new Light());
+        lightList.get(0).setId(0);
+        lightList.get(0).setType(3);
+        lightList.get(0).setPowerLevel(100);
+        lightList.get(0).setRunTimeUnix(43200);
+        lightList.add(new Light());
+        lightList.get(1).setId(1);
+        lightList.get(1).setType(1);
+        lightList.get(1).setPowerLevel(100);
+        lightList.get(1).setRunTimeUnix(33200);
+        gpList.get(0).setLightSequence(lightList);
+        gpList.get(0).setMoisture(50);
+        gpList.get(0).setName("testing gp");
+        gpList.get(0).setNightTemperature(15);
+        gpList.get(0).setTemperature(25);
+        gpList.get(0).setWaterLevel(20);
+        
+        this.addGrowthProfile(gpList.get(0));
+        
+        //GrowthProfile[] gpArr = gpList.toArray(new GrowthProfile[0]);
+        
+        /*for(int i = 0; i < gpArr.length; i++) {
+            this.gpMap.put(gpArr[i].getId(), gpArr[i]);
+        }
+        
+        this.saveGrowthProfiles();*/
+        
+        
+        List<Log> logList1 = new ArrayList<>();
+        logList1.add(new Log());
+        logList1.get(0).setValue("testing cunts");
+        logList1.get(0).setCmd(27);
+        this.addLog(logList1.get(0));
+        this.saveLogs();
+    }
+    
+    public void addGrowthProfile(GrowthProfile gp) {
+        this.gpMap.put(gp.getId(), gp);
+        this.saveGrowthProfiles();
+    }
+    
+    public int addManualGrowthProfile(GrowthProfile gp) {
+        int highestId = 1;
+        for(Integer integer : this.manualGPMap.keySet()) {
+            if(integer > highestId) {
+                highestId = integer;
+            }
+        }
+        this.manualGPMap.put(highestId, gp);
+        this.saveGrowthProfiles();
+        return highestId;
+    }
+    
+    private void saveGrowthProfiles() {
+        Set<GrowthProfile> gpSet = new HashSet<>();
+        gpSet.addAll(new HashSet<>(this.manualGPMap.values()));
+        gpSet.addAll(this.gpMap.values());
+        
+        try {
+            this.readWriteGrowthProfile.writeGrowthProfileFile(new ArrayList<>(gpSet));
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+    }
+    
+    public void addLog(Log log) {
+        this.logList.add(log);
+        this.saveLogs();
+    }
+    
+    public void clearLogList() {
+        this.logList.clear();
+        this.saveLogs();
+    }
+    
+    private void saveLogs() {
+        try {
+            this.readWriteLog.writeLogFile(this.logList);
+        } catch (IOException ex) {
+            System.out.println(ex);
         }
     }
 }
