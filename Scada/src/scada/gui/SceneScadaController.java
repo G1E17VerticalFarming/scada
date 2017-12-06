@@ -70,7 +70,7 @@ public class SceneScadaController implements Initializable {
     }
 
     private void populateListView() throws ClassNotFoundException, IOException {
-        ArrayList plcList = scada.readPLCFile();
+        ArrayList plcList = scada.readPLCList();
 
         PLCTable = FXCollections.observableArrayList(plcList);
         int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
@@ -160,11 +160,10 @@ public class SceneScadaController implements Initializable {
                 }
                 currentPLC.setLastCheck("" + ft.format(dNow));
 
-
                 newStatusList.add(currentPLC);
             }
             try {
-                scada.writePLCFile(newStatusList);
+                scada.savePLC(newStatusList);
             } catch (IOException e) {
                 e.printStackTrace();
             }

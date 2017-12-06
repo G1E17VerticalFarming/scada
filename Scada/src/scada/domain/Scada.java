@@ -6,13 +6,13 @@
 package scada.domain;
 
 //import scada.persistence.ProductionBlock;
-import com.sun.javafx.scene.control.skin.VirtualFlow;
 import scada.domain.interfaces.IScada;
 import scada.domain.interfaces.ReadWriteProductionBlock;
 import shared.ProductionBlock;
 import shared.GrowthProfile;
 import shared.Light;
 import shared.Log;
+import scada.persistence.FileHandler;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -20,21 +20,17 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import scada.domain.interfaces.ReadWriteGrowthProfile;
 import scada.domain.interfaces.ReadWriteLog;
-import scada.persistence.FileHandler;
 
 /**
  * @author chris
  */
 public class Scada implements IScada {
-    
+
     private ReadWriteProductionBlock readWriteProductionBlock;
     private ReadWriteLog readWriteLog;
     private ReadWriteGrowthProfile readWriteGrowthProfile;
@@ -47,7 +43,7 @@ public class Scada implements IScada {
         }
         return instance;
     }
-    
+
     private HashMap<Integer, ProductionBlock> pbMap;
     private HashMap<Integer, GrowthProfile> gpMap;
     private boolean continueAutomation = true;
@@ -59,7 +55,7 @@ public class Scada implements IScada {
         this.readWriteLog = FileHandler.getInstance();
         this.readWriteGrowthProfile = FileHandler.getInstance();
         // Is here to prevent instantiation
-        
+
         // Local variables
         this.pbMap = new HashMap<>();
         this.gpMap = new HashMap<>();
@@ -82,31 +78,24 @@ public class Scada implements IScada {
     }
 
     @Override
-    public void writePLCFile(ArrayList<ProductionBlock> plcList) throws IOException {
-        this.readWriteProductionBlock.writePLCFile(plcList);
+    public void savePLC(ArrayList<ProductionBlock> plcList) throws IOException {
+        readWriteProductionBlock.savePLC(plcList);
+    }
+
+    public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
+        this.readWriteProductionBlock.savePLC(plc);
     }
 
     @Override
-    public ArrayList<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException {
-        ArrayList<ProductionBlock> list = new ArrayList<>(this.readWriteProductionBlock.readPLCFile());
-        return list;
+    public ArrayList<ProductionBlock> readPLCList() throws IOException, ClassNotFoundException {
+        return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
     }
 
     @Override
     public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
-        ArrayList<ProductionBlock> list = new ArrayList<>(this.readWriteProductionBlock.readPLCFile());
-
-        Iterator<ProductionBlock> it = list.iterator();
-        while (it.hasNext()) {
-            ProductionBlock plc = it.next();
-            if (plc.getId() == plcToRemove) {
-                System.out.println("Removing ID: " + plcToRemove);
-                it.remove();
-                this.readWriteProductionBlock.writePLCFile(list);
-            }
-        }
+        readWriteProductionBlock.removePLC(plcToRemove);
     }
-    
+
     private void initiateTimedAutomationTask(long time) {
         new Timer(true).scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -115,12 +104,12 @@ public class Scada implements IScada {
             }
         }, time, time);
     }
-    
+
     private void doAutomation() {
         System.out.println("Starting updates!");
         if(this.continueAutomation) {
             this.updateProductionBlockMap();
-            
+
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
             Duration duration = Duration.between(midnight, now);
@@ -131,10 +120,10 @@ public class Scada implements IScada {
             secondsSinceMidnight += (40000 * this.debugCount++);
             secondsSinceMidnight = secondsSinceMidnight % 86400;
 
-            for(ProductionBlock pb : this.pbMap.values()) {
+            for (ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
                 AutomationProcess ap = new AutomationProcess(pb, this.gpMap.get(pb.getGrowthConfigId()), secondsSinceMidnight);
-                if(!ap.doUpdates()) {
+                if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
                 } else {
                     System.out.println("Did updates!");
@@ -142,11 +131,11 @@ public class Scada implements IScada {
             }
         }
     }
-    
+
     private void updateProductionBlockMap() {
         // Fetch list from MES, if not, just use what you have
         // pbArr = API.getBlaBlaBla();
-        
+
         // For debug
         this.gpMap.put(1, new GrowthProfile());
         this.gpMap.get(1).setId(1);
