@@ -92,7 +92,7 @@ public class AutomationProcess {
     
     private void updateTemperature() {
          // Assumption: Between 8 and 20 is the "day", this is because the light sequence is probably based on this too
-        if(this.secondsSinceMidnight > 28800 || this.secondsSinceMidnight < 72000) {
+        if(this.secondsSinceMidnight > 28800 && this.secondsSinceMidnight < 72000) {
             this.plcComm.SetTemperature(this.gp.getTemperature());
         } else {
             this.plcComm.SetTemperature(this.gp.getNightTemperature());

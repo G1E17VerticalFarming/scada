@@ -1,4 +1,4 @@
-package scada.domain;
+package scada.domain.interfaces;
 
 import API.IScadaFacade;
 //import scada.persistence.ProductionBlock;

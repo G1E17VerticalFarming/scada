@@ -6,8 +6,13 @@
 package scada.domain;
 
 //import scada.persistence.ProductionBlock;
+import com.sun.javafx.scene.control.skin.VirtualFlow;
+import scada.domain.interfaces.IScada;
+import scada.domain.interfaces.ReadWriteProductionBlock;
 import shared.ProductionBlock;
 import shared.GrowthProfile;
+import shared.Light;
+import shared.Log;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -19,6 +24,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import scada.domain.interfaces.ReadWriteGrowthProfile;
+import scada.domain.interfaces.ReadWriteLog;
 import scada.persistence.FileHandler;
 
 /**
@@ -27,6 +36,8 @@ import scada.persistence.FileHandler;
 public class Scada implements IScada {
     
     private ReadWriteProductionBlock readWriteProductionBlock;
+    private ReadWriteLog readWriteLog;
+    private ReadWriteGrowthProfile readWriteGrowthProfile;
     
     private static Scada instance = null;
 
@@ -40,15 +51,19 @@ public class Scada implements IScada {
     private HashMap<Integer, ProductionBlock> pbMap;
     private HashMap<Integer, GrowthProfile> gpMap;
     private boolean continueAutomation = true;
+    
+    private int debugCount = 0;
 
     protected Scada() {
         this.readWriteProductionBlock = FileHandler.getInstance();
+        this.readWriteLog = FileHandler.getInstance();
+        this.readWriteGrowthProfile = FileHandler.getInstance();
         // Is here to prevent instantiation
         
         // Local variables
         this.pbMap = new HashMap<>();
         this.gpMap = new HashMap<>();
-        this.initiateTimedAutomationTask(10000);
+        this.initiateTimedAutomationTask(20000);
     }
 
     @Override
@@ -102,13 +117,19 @@ public class Scada implements IScada {
     }
     
     private void doAutomation() {
+        System.out.println("Starting updates!");
         if(this.continueAutomation) {
             this.updateProductionBlockMap();
             
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
             Duration duration = Duration.between(midnight, now);
-            final long secondsSinceMidnight = duration.getSeconds();
+            long secondsSinceMidnight = duration.getSeconds();
+            
+            secondsSinceMidnight = 0;
+            
+            secondsSinceMidnight += (40000 * this.debugCount++);
+            secondsSinceMidnight = secondsSinceMidnight % 86400;
 
             for(ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
@@ -127,8 +148,40 @@ public class Scada implements IScada {
         // pbArr = API.getBlaBlaBla();
         
         // For debug
+        this.gpMap.put(1, new GrowthProfile());
+        this.gpMap.get(1).setId(1);
+        ArrayList<Light> lightList = new ArrayList<>();
+        lightList.add(new Light());
+        lightList.get(0).setId(0);
+        lightList.get(0).setType(3);
+        lightList.get(0).setPowerLevel(100);
+        lightList.get(0).setRunTimeUnix(43200);
+        this.gpMap.get(1).setLightSequence(lightList);
+        this.gpMap.get(1).setMoisture(50);
+        this.gpMap.get(1).setName("testing gp");
+        this.gpMap.get(1).setNightTemperature(15);
+        this.gpMap.get(1).setTemperature(25);
+        this.gpMap.get(1).setWaterLevel(20);
+        
+        try {
+            this.readWriteGrowthProfile.writeGrowthProfileFile(new ArrayList<>(this.gpMap.values()));
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+        
+        List<Log> logList = new ArrayList<>();
+        logList.add(new Log());
+        logList.get(0).setValue("testing cunts");
+        logList.get(0).setCmd(27);
+        try {
+            this.readWriteLog.writeLogFile(logList);
+        } catch(IOException ex) {
+            System.out.println(ex);
+        }
+        
         System.out.println("Updating pbMap");
-        ProductionBlock[] pbArr = {new ProductionBlock(0, "localhost", 12345, "n1"), new ProductionBlock(1, "localhost", 23456, "n2")};
+        ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
+        pbArr[0].setGrowthConfigId(1);
         
         for(int i = 0; i < pbArr.length; i++) {
             this.pbMap.put(pbArr[i].getId(), pbArr[i]);
