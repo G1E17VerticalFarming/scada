@@ -112,8 +112,7 @@ public class Message implements IMessage
     {
         byte [] data;
         byte [] result = this.getResult();
-        int dataSize = result[SIZE];
-
+        int dataSize = result.length - 10;
         data = new byte[dataSize];
         for (int i=0; i<dataSize; i++)
             data[i] = result[DATA_START + i];
