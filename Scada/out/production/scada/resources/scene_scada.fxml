@@ -1,58 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.text.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="768.0" prefWidth="1024.0"
-            style="-fx-background-color: darkgray;" xmlns="http://javafx.com/javafx/8.0.141"
-            fx:controller="scada.gui.SceneScadaController">
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="768.0" prefWidth="1100.0" style="-fx-background-color: darkgray;" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="scada.gui.SceneScadaController">
     <children>
         <Label alignment="TOP_LEFT" layoutX="14.0" layoutY="14.0" text="Vertical Farming SCADA">
             <font>
-                <Font name="Arial Black" size="45.0"/>
+                <Font name="Arial Black" size="45.0" />
             </font>
         </Label>
-        <Button fx:id="buttonCheckStatus" alignment="CENTER_RIGHT" layoutX="925.0" layoutY="14.0"
-                mnemonicParsing="false" onAction="#checkStatus" text="Tjek Status"/>
+        <Button fx:id="buttonCheckStatus" alignment="CENTER_RIGHT" layoutX="925.0" layoutY="14.0" mnemonicParsing="false" onAction="#checkStatus" text="Tjek Status" />
         <Label layoutX="24.0" layoutY="82.0" text="PLC Overview">
             <font>
-                <Font name="Arial Black" size="20.0"/>
+                <Font name="Arial Black" size="20.0" />
             </font>
         </Label>
-        <TableView fx:id="tableviewPLC" layoutX="24.0" layoutY="112.0" prefHeight="495.0" prefWidth="986.0">
+        <TableView fx:id="tableviewPLC" layoutX="24.0" layoutY="112.0" prefHeight="495.0" prefWidth="1050.0">
             <columns>
-                <TableColumn fx:id="PLC_ID" prefWidth="32.0" resizable="false" text="ID"/>
-                <TableColumn fx:id="PLC_name" prefWidth="135.0" resizable="false" text="Name"/>
-                <TableColumn fx:id="PLC_IP" prefWidth="100.0" resizable="false" text="IP-Address"/>
-                <TableColumn fx:id="PLC_port" prefWidth="50.0" resizable="false" text="Port"/>
-                <TableColumn fx:id="PLC_status" prefWidth="150.0" resizable="false" text="Status"/>
-                <TableColumn fx:id="PLC_temp1" prefWidth="60.0" resizable="false" text="Temp1"/>
-                <TableColumn fx:id="PLC_temp2" prefWidth="60.0" resizable="false" text="Temp2"/>
-                <TableColumn fx:id="PLC_moisture" prefWidth="60.0" resizable="false" text="Moisture"/>
-                <TableColumn fx:id="PLC_ETA" prefWidth="108.0" resizable="false" text="ETA"/>
-                <TableColumn fx:id="PLC_lastOK" prefWidth="115.0" resizable="false" text="Last OK"/>
-                <TableColumn fx:id="PLC_lastCheck" prefWidth="115.0" resizable="false" text="Last Check"/>
+                <TableColumn fx:id="PLC_ID" prefWidth="32.0" resizable="false" text="ID" />
+                <TableColumn fx:id="PLC_name" prefWidth="135.0" resizable="false" text="Name" />
+                <TableColumn fx:id="PLC_IP" prefWidth="100.0" resizable="false" text="IP-Address" />
+                <TableColumn fx:id="PLC_port" prefWidth="50.0" resizable="false" text="Port" />
+                <TableColumn fx:id="PLC_status" prefWidth="150.0" resizable="false" text="Status" />
+                <TableColumn fx:id="PLC_temp1" prefWidth="60.0" resizable="false" text="Temp1" />
+                <TableColumn fx:id="PLC_temp2" prefWidth="60.0" resizable="false" text="Temp2" />
+                <TableColumn fx:id="PLC_moisture" prefWidth="60.0" resizable="false" text="Moisture" />
+                <TableColumn fx:id="PLC_ETA" prefWidth="108.0" resizable="false" text="ETA" />
+                <TableColumn fx:id="PLC_lastOK" prefWidth="145.0" resizable="false" text="Last OK" />
+                <TableColumn fx:id="PLC_lastCheck" prefWidth="145.0" resizable="false" text="Last Check" />
             </columns>
         </TableView>
-        <Button fx:id="buttonAddPLC" alignment="CENTER_RIGHT" layoutX="24.0" layoutY="729.0" mnemonicParsing="false"
-                onAction="#addPLC" text="Tilføj PLC" textFill="#1c9601">
+        <Button fx:id="buttonAddPLC" alignment="CENTER_RIGHT" layoutX="24.0" layoutY="729.0" mnemonicParsing="false" onAction="#addPLC" text="Tilføj PLC" textFill="#1c9601">
             <font>
-                <Font name="Arial Black" size="12.0"/>
+                <Font name="Arial Black" size="12.0" />
             </font>
         </Button>
-        <Button fx:id="buttonRemovePLC" alignment="CENTER_RIGHT" layoutX="114.0" layoutY="729.0" mnemonicParsing="false"
-                onAction="#removePLC" text="Fjern PLC" textFill="RED">
+        <Button fx:id="buttonRemovePLC" alignment="CENTER_RIGHT" layoutX="114.0" layoutY="729.0" mnemonicParsing="false" onAction="#removePLC" text="Fjern PLC" textFill="RED">
             <font>
-                <Font name="Arial Black" size="12.0"/>
+                <Font name="Arial Black" size="12.0" />
             </font>
         </Button>
-        <Button fx:id="buttonOpenPLC" alignment="CENTER_RIGHT" layoutX="875.0" layoutY="620.0" mnemonicParsing="false"
-                onAction="#openPLC" text="PLC Egenskaber">
+        <Button fx:id="buttonOpenPLC" alignment="CENTER_RIGHT" layoutX="875.0" layoutY="620.0" mnemonicParsing="false" onAction="#openPLC" text="PLC Egenskaber">
             <font>
-                <Font name="Arial Black" size="12.0"/>
+                <Font name="Arial Black" size="12.0" />
             </font>
         </Button>
-        <TextField fx:id="labelTimer" disable="true" editable="false" layoutX="889.0" layoutY="56.0" prefHeight="26.0"
-                   prefWidth="119.0" text="Næste tjek: 30 sek"/>
+        <TextField fx:id="labelTimer" disable="true" editable="false" layoutX="889.0" layoutY="56.0" prefHeight="26.0" prefWidth="119.0" text="Næste tjek: 30 sek" />
     </children>
 </AnchorPane>

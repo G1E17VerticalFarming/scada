@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="768.0" prefWidth="1024.0"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="768.0" prefWidth="1100.0"
             style="-fx-background-color: darkgray;" xmlns="http://javafx.com/javafx/8.0.141"
             fx:controller="scada.gui.SceneScadaController">
     <children>
@@ -19,7 +19,7 @@
                 <Font name="Arial Black" size="20.0"/>
             </font>
         </Label>
-        <TableView fx:id="tableviewPLC" layoutX="24.0" layoutY="112.0" prefHeight="495.0" prefWidth="986.0">
+        <TableView fx:id="tableviewPLC" layoutX="24.0" layoutY="112.0" prefHeight="495.0" prefWidth="1050.0">
             <columns>
                 <TableColumn fx:id="PLC_ID" prefWidth="32.0" resizable="false" text="ID"/>
                 <TableColumn fx:id="PLC_name" prefWidth="135.0" resizable="false" text="Name"/>
@@ -30,8 +30,8 @@
                 <TableColumn fx:id="PLC_temp2" prefWidth="60.0" resizable="false" text="Temp2"/>
                 <TableColumn fx:id="PLC_moisture" prefWidth="60.0" resizable="false" text="Moisture"/>
                 <TableColumn fx:id="PLC_ETA" prefWidth="108.0" resizable="false" text="ETA"/>
-                <TableColumn fx:id="PLC_lastOK" prefWidth="115.0" resizable="false" text="Last OK"/>
-                <TableColumn fx:id="PLC_lastCheck" prefWidth="115.0" resizable="false" text="Last Check"/>
+                <TableColumn fx:id="PLC_lastOK" prefWidth="145.0" resizable="false" text="Last OK"/>
+                <TableColumn fx:id="PLC_lastCheck" prefWidth="145.0" resizable="false" text="Last Check"/>
             </columns>
         </TableView>
         <Button fx:id="buttonAddPLC" alignment="CENTER_RIGHT" layoutX="24.0" layoutY="729.0" mnemonicParsing="false"

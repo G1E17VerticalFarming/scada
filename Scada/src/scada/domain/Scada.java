@@ -6,27 +6,25 @@
 package scada.domain;
 
 //import scada.persistence.ProductionBlock;
+
+import PLCCommunication.PLC;
+import PLCCommunication.UDPConnection;
 import scada.domain.interfaces.IScada;
+import scada.domain.interfaces.ReadWriteGrowthProfile;
+import scada.domain.interfaces.ReadWriteLog;
 import scada.domain.interfaces.ReadWriteProductionBlock;
-import shared.ProductionBlock;
+import scada.persistence.FileHandler;
 import shared.GrowthProfile;
 import shared.Light;
 import shared.Log;
-import scada.persistence.FileHandler;
+import shared.ProductionBlock;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import scada.domain.interfaces.ReadWriteGrowthProfile;
-import scada.domain.interfaces.ReadWriteLog;
+import java.util.*;
 
 /**
  * @author chris
@@ -53,6 +51,7 @@ public class Scada implements IScada {
     private boolean continueAutomation = true;
     
     private int debugCount = 0;
+    private SimpleDateFormat ft = new SimpleDateFormat("dd/MM-yyyy HH:mm:ss");
 
     protected Scada() {
         this.readWriteProductionBlock = FileHandler.getInstance();
@@ -258,5 +257,50 @@ public class Scada implements IScada {
         } else {
             return this.gpMap.get(pb.getManualGrowthConfigId());
         }
+    }
+
+    public synchronized void checkStatus(ArrayList<ProductionBlock> tableviewPLC) throws IOException {
+        new Thread(() -> {
+            ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
+
+            for (ProductionBlock plc : tableviewPLC) {
+                Date dNow = new Date();
+                System.out.println("Checking status of " + plc.getIpaddress() + ":" + plc.getPort());
+
+                PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
+
+                // Check status of PLC
+                double temp1 = plccomm.ReadTemp1();
+
+                if (temp1 == -1) { // No connection to PLC
+                    plc.setTemp1(-1);
+                    plc.setTemp2(-1);
+                    plc.setMoisture(-1);
+                    //currentPLC.setStatus("No connection");
+                    plc.setFanspeed(-1);
+                } else if (temp1 == -2) { // Error in returned data
+                    plc.setTemp1(-2);
+                    plc.setTemp2(-2);
+                    plc.setMoisture(-2);
+                    //currentPLC.setStatus("Data error");
+                    plc.setFanspeed(-2);
+                } else {
+                    plc.setTemp1(temp1);
+                    plc.setTemp2(plccomm.ReadTemp2());
+                    plc.setMoisture(plccomm.ReadMoist());
+                    //currentPLC.setStatus("OK");
+                    plc.setLastOK("" + ft.format(dNow));
+                }
+                plc.setLastCheck("" + ft.format(dNow));
+
+                newStatusList.add(plc);
+            }
+            try {
+                savePLC(newStatusList);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("You checked the status of the PLC's ");
+        }).start();
     }
 }

@@ -5,8 +5,6 @@
  */
 package scada.gui;
 
-import PLCCommunication.PLC;
-import PLCCommunication.UDPConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -27,9 +25,7 @@ import shared.ProductionBlock;
 
 import java.io.IOException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 
@@ -37,8 +33,6 @@ public class SceneScadaController implements Initializable {
     private Scada scada = Scada.getInstance();
     private ObservableList<ProductionBlock> PLCTable;
     private final Integer countDownTime = 30; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
-    private SimpleDateFormat ft = new SimpleDateFormat("dd/MM-yyyy HH:mm:ss");
-
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
@@ -126,50 +120,9 @@ public class SceneScadaController implements Initializable {
     }
 
     public synchronized void checkStatus() throws IOException {
-        new Thread(() -> {
-            ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
-
-            for (Object plc : tableviewPLC.getItems()) {
-                Date dNow = new Date();
-                ProductionBlock currentPLC = (ProductionBlock) plc;
-                System.out.println("Checking status of " + currentPLC.getIpaddress() + ":" + currentPLC.getPort());
-
-                PLC plccomm = new PLC(new UDPConnection(currentPLC.getPort(), currentPLC.getIpaddress()));
-
-                // Check status of PLC
-                double temp1 = plccomm.ReadTemp1();
-
-                if (temp1 == -1) { // No connection to PLC
-                    currentPLC.setTemp1(-1);
-                    currentPLC.setTemp2(-1);
-                    currentPLC.setMoisture(-1);
-                    //currentPLC.setStatus("No connection");
-                    currentPLC.setFanspeed(-1);
-                } else if (temp1 == -2) { // Error in returned data
-                    currentPLC.setTemp1(-2);
-                    currentPLC.setTemp2(-2);
-                    currentPLC.setMoisture(-2);
-                    //currentPLC.setStatus("Data error");
-                    currentPLC.setFanspeed(-2);
-                } else {
-                    currentPLC.setTemp1(temp1);
-                    currentPLC.setTemp2(plccomm.ReadTemp2());
-                    currentPLC.setMoisture(plccomm.ReadMoist());
-                    //currentPLC.setStatus("OK");
-                    currentPLC.setLastOK("" + ft.format(dNow));
-                }
-                currentPLC.setLastCheck("" + ft.format(dNow));
-
-                newStatusList.add(currentPLC);
-            }
-            try {
-                scada.savePLC(newStatusList);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            tableviewPLC.refresh();
-            System.out.println("You checked the status of the PLC's ");
-        }).start();
+        ArrayList<ProductionBlock> plcs = new ArrayList<>(tableviewPLC.getItems());
+        scada.checkStatus(plcs);
+        tableviewPLC.refresh();
     }
 
     public synchronized void removePLC() throws IOException, ClassNotFoundException {

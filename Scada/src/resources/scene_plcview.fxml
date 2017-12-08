@@ -31,22 +31,22 @@
         <Label layoutX="336.0" layoutY="200.0" prefHeight="16.0" prefWidth="72.0" text="Red Light"/>
         <Label layoutX="335.0" layoutY="240.0" prefHeight="16.0" prefWidth="72.0" text="Light Blue"/>
         <Spinner fx:id="temp1Spinner" amountToStepBy="1" editable="true" layoutX="435.0" layoutY="71.0" max="30" min="0"
-                 prefHeight="26.0" prefWidth="60.0"/>
+                 prefHeight="26.0" prefWidth="75.0"/>
         <Spinner fx:id="waterSpinner" amountToStepBy="1" initialValue="0" layoutX="435.0" layoutY="153.0" max="119"
-                 min="0" prefHeight="26.0" prefWidth="60.0"/>
+                 min="0" prefHeight="26.0" prefWidth="75.0"/>
         <Spinner fx:id="lightRedSpinner" amountToStepBy="5" editable="true" layoutX="435.0" layoutY="196.0" max="100"
-                 min="0" prefHeight="26.0" prefWidth="60.0"/>
+                 min="0" prefHeight="26.0" prefWidth="75.0"/>
         <Spinner fx:id="lightBlueSpinner" amountToStepBy="5" editable="true" layoutX="435.0" layoutY="236.0" max="100"
-                 min="0" prefHeight="26.0" prefWidth="60.0"/>
+                 min="0" prefHeight="26.0" prefWidth="75.0"/>
         <Label layoutX="14.0" layoutY="64.0" text="PLC ID:" textFill="WHITE">
             <font>
                 <Font name="System Bold" size="12.0"/>
             </font>
         </Label>
-        <Label layoutX="501.0" layoutY="76.0" text="°Celsius"/>
-        <Label layoutX="501.0" layoutY="158.0" text="Seconds"/>
-        <Label layoutX="501.0" layoutY="201.0" text="\%"/>
-        <Label layoutX="501.0" layoutY="241.0" text="\%"/>
+        <Label layoutX="520.0" layoutY="76.0" text="°Celsius"/>
+        <Label layoutX="520.0" layoutY="158.0" text="Seconds"/>
+        <Label layoutX="520.0" layoutY="201.0" text="\%"/>
+        <Label layoutX="520.0" layoutY="241.0" text="\%"/>
         <Button fx:id="buttonUpdate" layoutX="96.0" layoutY="316.0" mnemonicParsing="false" onAction="#updatePLC"
                 text="Gem &amp; luk"/>
         <Label layoutX="14.0" layoutY="126.0" text="PLC IP: " textAlignment="CENTER" textFill="WHITE">
@@ -73,7 +73,7 @@
                 <Font name="System Bold" size="30.0"/>
             </font>
         </Text>
-        <ChoiceBox fx:id="fanSpeed" layoutX="445.0" layoutY="114.0" prefWidth="50.0" value="Off">
+        <ChoiceBox fx:id="fanSpeed" layoutX="435.0" layoutY="114.0" prefWidth="75.0" value="Off">
             <items>
                 <FXCollections fx:factory="observableArrayList">
                     <String fx:value="Off"/>

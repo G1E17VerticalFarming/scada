@@ -5,10 +5,11 @@
  */
 package scada.persistence;
 
-import java.io.File;
-import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 
 /**
  *
