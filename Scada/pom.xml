@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>FLIB</groupId>
 			<artifactId>flib</artifactId>
-			<version>1.2</version>
+			<version>1.3</version>
 		</dependency>
 		<dependency>
 		  <groupId>com.squareup.okhttp</groupId>
@@ -52,7 +52,7 @@
 				<version>3.1</version>
 				<configuration>
 					<fork>true</fork>
-					<executable>C:\Program Files\Java\jdk1.8.0_121\bin\javac.exe</executable>
+					<executable>C:\Program Files\Java\jdk1.8.0_131\bin\javac.exe</executable>
 				</configuration>
 			</plugin>
             <plugin>
@@ -75,7 +75,9 @@
 						<source>src/scada/api</source>
 						<source>src/scada/gui</source>
 						<source>src/scada/domain</source>
+						<source>src/scada/domain/interfaces</source>
 						<source>src/scada/persistence</source>
+						<source>src/PLCCommunication</source>
 					  </sources>
 					</configuration>
 				  </execution>
