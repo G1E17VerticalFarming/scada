@@ -1,3 +1,4 @@
+scada\domain\interfaces\IScadaApiReceive.class
 main\java\ApiFacade.class
 PLCCommunication\PLCConnection.class
 scada\gui\SceneLoginController.class
@@ -11,6 +12,7 @@ scada\gui\SceneScadaController.class
 scada\domain\interfaces\ReadWriteLog.class
 PLCCommunication\IMessage.class
 PLCCommunication\ICommands.class
+scada\domain\interfaces\IScadaApiSend.class
 scada\domain\User.class
 scada\domain\Scada$1.class
 scada\persistence\JsonEncoder.class

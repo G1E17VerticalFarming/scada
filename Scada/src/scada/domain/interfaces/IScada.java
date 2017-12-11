@@ -8,12 +8,13 @@ import java.util.ArrayList;
 
 //import scada.persistence.ProductionBlock;
 
-public interface IScada extends IScadaFacade {
-    ArrayList readPLCList() throws IOException, ClassNotFoundException;
+public interface IScada {
+    //ArrayList<ProductionBlock> readPLCList() throws IOException, ClassNotFoundException;
+    ArrayList<ProductionBlock> getPLCList();
+    
+    ArrayList<ProductionBlock> getUpdatedPLCList();
 
-    void savePLC(ArrayList<ProductionBlock> plcList) throws IOException;
+    void savePLC(ProductionBlock plc);
 
-    void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException;
-
-    void removePLC(int plcToRemove) throws IOException, ClassNotFoundException;
+    void removePLC(int plcToRemove);
 }

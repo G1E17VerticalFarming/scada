@@ -6,6 +6,7 @@
 package scada.api;
 
 import java.io.IOException;
+import scada.domain.interfaces.IScadaApiSend;
 
 import shared.ProductionBlock;
 import shared.GrowthProfile;
@@ -15,14 +16,28 @@ import shared.GrowthProfile;
  *
  * @author DanielToft
  */
-public class ApiSendController {
+public class ApiSendController implements IScadaApiSend {
     
+    private static ApiSendController instance = null;
+
+    public static ApiSendController getInstance() {
+        if (instance == null) {
+            instance = new ApiSendController();
+        }
+        return instance;
+    }
     
+    private String address = "http://localhost:8081";
     
+    private ApiSendController() {
+        
+    }
+    
+    @Override
     public ProductionBlock[] getAllProductionBlocks() {
         ProductionBlock[] pbArr;
         try {
-            pbArr = HttpOkhttpPostSend.doGetRequest("http://localhost:8080/production_block/", ProductionBlock[].class);
+            pbArr = HttpOkhttpPostSend.doGetRequest(this.address + "/production_block/", ProductionBlock[].class);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return null;
@@ -30,10 +45,11 @@ public class ApiSendController {
         return pbArr;
     }
     
+    @Override
     public ProductionBlock getSpecificProductionBlock(int id) {
         ProductionBlock pb;
         try {
-            pb = HttpOkhttpPostSend.doGetRequest("http://localhost:8080/production_block/" + id, ProductionBlock.class);
+            pb = HttpOkhttpPostSend.doGetRequest(this.address + "/production_block/" + id, ProductionBlock.class);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return null;
@@ -41,21 +57,25 @@ public class ApiSendController {
         return pb;
     }
     
+    @Override
     public String saveProductionBlock(ProductionBlock pb) {
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         String returnStr;
         try {
-            returnStr = HttpOkhttpPostSend.doPostRequest("http://localhost:8080/production_block/", pb);
+            returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/production_block/", pb);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return "not success";
         }
+        System.out.println(returnStr);
         return returnStr;
     }
     
+    @Override
     public GrowthProfile getSpecificGrowthProfile(int id) {
         GrowthProfile gp;
         try {
-            gp = HttpOkhttpPostSend.doGetRequest("http://localhost:8080/growth_profile/" + id, GrowthProfile.class);
+            gp = HttpOkhttpPostSend.doGetRequest(this.address + "/growth_profile/" + id, GrowthProfile.class);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return null;
@@ -73,4 +93,16 @@ public class ApiSendController {
         }
         return returnStr;
     }*/
+
+    @Override
+    public boolean ping() {
+        boolean bool;
+        try {
+            bool = HttpOkhttpPostSend.doGetRequest(this.address + "/ping/", boolean.class);
+        } catch (IOException ex) {
+            System.out.println("Something brok");
+            return false;
+        }
+        return bool;
+    }
 }

@@ -16,6 +16,7 @@ import shared.ProductionBlock;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import scada.domain.interfaces.IScada;
 
 /**
  * FXML Controller class
@@ -23,7 +24,7 @@ import java.util.ResourceBundle;
  * @author mads
  */
 public class ScenePopupController implements Initializable {
-    private Scada scada = Scada.getInstance();
+    private IScada scada;
 
     @FXML
     private TextField nameTextField, IPTextField, portTextField;

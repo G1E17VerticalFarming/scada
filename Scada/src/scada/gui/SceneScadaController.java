@@ -27,12 +27,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
-
+import scada.domain.interfaces.IScada;
 
 public class SceneScadaController implements Initializable {
-    private Scada scada = Scada.getInstance();
+
+    private IScada scada = Scada.getInstance();
     private ObservableList<ProductionBlock> PLCTable;
-    private final Integer countDownTime = 30; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
+    private final Integer countDownTime = 3000; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
@@ -54,20 +55,6 @@ public class SceneScadaController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         this.scada = Scada.getInstance();
-        try {
-            populateListView();
-            startTimer(); //Start the startTimer for countdown
-
-        } catch (IOException | ClassNotFoundException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void populateListView() throws ClassNotFoundException, IOException {
-        ArrayList plcList = scada.readPLCList();
-
-        PLCTable = FXCollections.observableArrayList(plcList);
-        int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
 
         PLC_ID.setCellValueFactory(new PropertyValueFactory<>("id"));
         PLC_IP.setCellValueFactory(new PropertyValueFactory<>("ipaddress"));
@@ -81,8 +68,26 @@ public class SceneScadaController implements Initializable {
         PLC_lastOK.setCellValueFactory(new PropertyValueFactory("lastOK"));
         PLC_ETA.setCellValueFactory(new PropertyValueFactory("estimatedDone"));
 
+        PLCTable = FXCollections.observableArrayList();
         tableviewPLC.setItems(PLCTable);
-        tableviewPLC.getSelectionModel().select(currentSelectionIndex);
+
+        populateListView();
+        startTimer(); //Start the startTimer for countdown
+
+        //PLCTable = FXCollections.observableArrayList(plcList);
+        //tableviewPLC.setItems(PLCTable);
+    }
+
+    private void populateListView() {
+        ArrayList<ProductionBlock> plcList = scada.getPLCList();
+        System.out.println("PLC SIZE:" + plcList.size());
+        PLCTable.clear();
+        PLCTable.addAll(plcList);
+
+        tableviewPLC.refresh();
+        //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
+        //tableviewPLC.getSelectionModel().select(currentSelectionIndex);
+
         System.out.println("PLC's loaded (if any)");
     }
 
@@ -90,8 +95,8 @@ public class SceneScadaController implements Initializable {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
 
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/resources/scene_plcview.fxml"));
-        final Parent root = fxmlLoader.load();
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("scene_plcview.fxml"));
+        Parent root = fxmlLoader.load();
         Scene scene = new Scene(root);
 
         ScenePLCView controller = fxmlLoader.getController();
@@ -109,7 +114,7 @@ public class SceneScadaController implements Initializable {
     public synchronized void addPLC() throws IOException, ClassNotFoundException {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-        Parent root = FXMLLoader.load(getClass().getResource("/resources/scene_popup.fxml"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_popup.fxml"));
         Scene scene = new Scene(root);
 
         stageAddPLC.setScene(scene);
@@ -119,10 +124,19 @@ public class SceneScadaController implements Initializable {
         populateListView();
     }
 
-    public synchronized void checkStatus() throws IOException {
-        ArrayList<ProductionBlock> plcs = new ArrayList<>(tableviewPLC.getItems());
-        scada.checkStatus(plcs);
+    public synchronized void checkStatus() {
+        ArrayList<ProductionBlock> plcList = scada.getUpdatedPLCList();
+        PLCTable.clear();
+        PLCTable.addAll(plcList);
+
         tableviewPLC.refresh();
+        //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
+        //tableviewPLC.getSelectionModel().select(currentSelectionIndex);
+
+        System.out.println("Updated PLC's loaded (if any)");
+        //ArrayList<ProductionBlock> plcs = new ArrayList<>(tableviewPLC.getItems());
+        //scada.checkStatus(plcs);
+        //tableviewPLC.refresh();
     }
 
     public synchronized void removePLC() throws IOException, ClassNotFoundException {
@@ -133,17 +147,17 @@ public class SceneScadaController implements Initializable {
         }
     }
 
-    private void startTimer() throws InterruptedException {
+    private void startTimer() {
         new Thread(() -> {
             for (int i = countDownTime; i >= 0; i--) {
                 try {
                     labelTimer.setText("Næste tjek: " + i + " sek");
                     Thread.sleep(1000);
-                    if (i == 0) {
+                    if (i <= 0) {
                         checkStatus();
                         i = countDownTime;
                     }
-                } catch (InterruptedException | IOException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }

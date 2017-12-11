@@ -6,7 +6,6 @@
 package scada.domain;
 
 //import scada.persistence.ProductionBlock;
-
 import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
 import scada.domain.interfaces.IScada;
@@ -25,6 +24,10 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import scada.api.ApiSendController;
+import scada.domain.interfaces.IScadaApiSend;
 
 /**
  * @author chris
@@ -34,7 +37,9 @@ public class Scada implements IScada {
     private ReadWriteProductionBlock readWriteProductionBlock;
     private ReadWriteLog readWriteLog;
     private ReadWriteGrowthProfile readWriteGrowthProfile;
-    
+
+    private final IScadaApiSend apiSend;
+
     private static Scada instance = null;
 
     public static Scada getInstance() {
@@ -49,7 +54,7 @@ public class Scada implements IScada {
     private HashMap<Integer, GrowthProfile> manualGPMap;
     private ArrayList<Log> logList;
     private boolean continueAutomation = true;
-    
+
     private int debugCount = 0;
     private SimpleDateFormat ft = new SimpleDateFormat("dd/MM-yyyy HH:mm:ss");
 
@@ -57,6 +62,8 @@ public class Scada implements IScada {
         this.readWriteProductionBlock = FileHandler.getInstance();
         this.readWriteLog = FileHandler.getInstance();
         this.readWriteGrowthProfile = FileHandler.getInstance();
+
+        this.apiSend = ApiSendController.getInstance();
         // Is here to prevent instantiation
 
         // Local variables
@@ -65,44 +72,62 @@ public class Scada implements IScada {
         this.manualGPMap = new HashMap<>();
         this.logList = new ArrayList<>();
         this.initiateTimedAutomationTask(20000);
-        
+
+        this.updateProductionBlockMap();
+        this.updateGrowthProfileMap();
+
         //Debugs
         this.debugAdd();
     }
 
     @Override
-    public boolean ping(String testData) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public synchronized void savePLC(ProductionBlock plc) {
+        plc.setId(101);
+        this.pbMap.put(plc.getId(), plc);
+        this.savePLC();
+    }
+
+    private synchronized void savePLC() {
+        try {
+            this.readWriteProductionBlock.savePLC(new ArrayList<>(this.pbMap.values()));
+        } catch (IOException ex) {
+            System.out.println("Error: " + ex);
+        }
+
+        if (this.apiSend.ping()) {
+            this.pbMap.values().parallelStream().forEach((ProductionBlock pb) -> {
+                this.apiSend.saveProductionBlock(pb);
+            });
+        }
+    }
+
+    //@Override
+    private ArrayList<ProductionBlock> readPLCList() {
+        try {
+            return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
+        } catch (IOException | ClassNotFoundException ex) {
+            System.out.println(ex);
+            return new ArrayList<>();
+        }
+    }
+
+    private ArrayList<GrowthProfile> readGbList() {
+        try {
+            return (ArrayList<GrowthProfile>) this.readWriteGrowthProfile.readGrowthProfileFile();
+        } catch (IOException | ClassNotFoundException ex) {
+            System.out.println(ex);
+            return new ArrayList<>();
+        }
     }
 
     @Override
-    public List<shared.ProductionBlock> getProductionBlocks() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean setProduction(String productionBlock, String growthProfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void savePLC(ArrayList<ProductionBlock> plcList) throws IOException {
-        readWriteProductionBlock.savePLC(plcList);
-    }
-
-    @Override
-    public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
-        this.readWriteProductionBlock.savePLC(plc);
-    }
-
-    @Override
-    public ArrayList<ProductionBlock> readPLCList() throws IOException, ClassNotFoundException {
-        return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
-    }
-
-    @Override
-    public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
-        readWriteProductionBlock.removePLC(plcToRemove);
+    public void removePLC(int plcToRemove) {
+        this.pbMap.remove(plcToRemove);
+        try {
+            this.readWriteProductionBlock.savePLC(new ArrayList<>(this.pbMap.values()));
+        } catch (IOException ex) {
+            System.out.println("Error: " + ex);
+        }
     }
 
     private void initiateTimedAutomationTask(long time) {
@@ -116,23 +141,23 @@ public class Scada implements IScada {
 
     private void doAutomation() {
         System.out.println("Starting updates!");
-        if(this.continueAutomation) {
+        if (this.continueAutomation) {
             this.updateProductionBlockMap();
 
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
             Duration duration = Duration.between(midnight, now);
             long secondsSinceMidnight = duration.getSeconds();
-            
+
             secondsSinceMidnight = 0;
-            
+
             secondsSinceMidnight += (40000 * this.debugCount++);
             secondsSinceMidnight = secondsSinceMidnight % 86400;
 
             for (ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
-                
+
                 AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
                 if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
@@ -143,21 +168,48 @@ public class Scada implements IScada {
         }
     }
 
-    private void updateProductionBlockMap() {
+    private synchronized void updateProductionBlockMap() {
         // Fetch list from MES, if not, just use what you have
         // pbArr = API.getBlaBlaBla();
 
         // For debug
-        
         System.out.println("Updating pbMap");
-        ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
-        pbArr[0].setGrowthConfigId(1);
-        
-        for(int i = 0; i < pbArr.length; i++) {
-            this.pbMap.put(pbArr[i].getId(), pbArr[i]);
+        //ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
+        //pbArr[0].setGrowthConfigId(1);
+        ArrayList<ProductionBlock> pbList;
+
+        if (this.apiSend.ping()) {
+            pbList = new ArrayList<>(Arrays.asList(this.apiSend.getAllProductionBlocks()));
+        } else {
+            pbList = this.readPLCList();
+        }
+
+        System.out.println("TEST" + pbList.size());
+
+        for (ProductionBlock pb : pbList) {
+            this.pbMap.put(pb.getId(), pb);
         }
     }
-    
+
+    private synchronized void updateGrowthProfileMap() {
+        // Fetch list from MES, if not, just use what you have
+        // pbArr = API.getBlaBlaBla();
+
+        // For debug
+        System.out.println("Updating gbMap");
+        List<GrowthProfile> gbList;
+
+        gbList = this.readGbList();
+
+        for (GrowthProfile gp : gbList) {
+            if (gp.getId() >= 0) {
+                this.gpMap.put(gp.getId(), gp);
+            } else {
+                this.manualGPMap.put(gp.getId(), gp);
+            }
+        }
+    }
+
     public void debugAdd() {
         // Fetch list from MES, if not, just use what you have
         // pbArr = API.getBlaBlaBla();
@@ -183,18 +235,15 @@ public class Scada implements IScada {
         gpList.get(0).setNightTemperature(15);
         gpList.get(0).setTemperature(25);
         gpList.get(0).setWaterLevel(20);
-        
+
         this.addGrowthProfile(gpList.get(0));
-        
+
         //GrowthProfile[] gpArr = gpList.toArray(new GrowthProfile[0]);
-        
         /*for(int i = 0; i < gpArr.length; i++) {
             this.gpMap.put(gpArr[i].getId(), gpArr[i]);
         }
         
         this.saveGrowthProfiles();*/
-        
-        
         List<Log> logList1 = new ArrayList<>();
         logList1.add(new Log());
         logList1.get(0).setValue("testing cunts");
@@ -202,16 +251,16 @@ public class Scada implements IScada {
         this.addLog(logList1.get(0));
         this.saveLogs();
     }
-    
+
     public void addGrowthProfile(GrowthProfile gp) {
         this.gpMap.put(gp.getId(), gp);
         this.saveGrowthProfiles();
     }
-    
+
     public int addManualGrowthProfile(GrowthProfile gp) {
         int highestId = 1;
-        for(Integer integer : this.manualGPMap.keySet()) {
-            if(integer > highestId) {
+        for (Integer integer : this.manualGPMap.keySet()) {
+            if (integer > highestId) {
                 highestId = integer;
             }
         }
@@ -219,29 +268,29 @@ public class Scada implements IScada {
         this.saveGrowthProfiles();
         return highestId;
     }
-    
+
     private void saveGrowthProfiles() {
         Set<GrowthProfile> gpSet = new HashSet<>();
-        gpSet.addAll(new HashSet<>(this.manualGPMap.values()));
+        gpSet.addAll(this.manualGPMap.values());
         gpSet.addAll(this.gpMap.values());
-        
+
         try {
             this.readWriteGrowthProfile.writeGrowthProfileFile(new ArrayList<>(gpSet));
         } catch (IOException ex) {
             System.out.println(ex);
         }
     }
-    
+
     public void addLog(Log log) {
         this.logList.add(log);
         this.saveLogs();
     }
-    
+
     public void clearLogList() {
         this.logList.clear();
         this.saveLogs();
     }
-    
+
     private void saveLogs() {
         try {
             this.readWriteLog.writeLogFile(this.logList);
@@ -249,58 +298,68 @@ public class Scada implements IScada {
             System.out.println(ex);
         }
     }
-    
+
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
         //Probalby should check whether selectedGp is null
-        if(pb.getManualGrowthConfigId() > 0) {
+        if (pb.getManualGrowthConfigId() > 0) {
             return this.gpMap.get(pb.getGrowthConfigId());
         } else {
             return this.gpMap.get(pb.getManualGrowthConfigId());
         }
     }
 
-    public synchronized void checkStatus(ArrayList<ProductionBlock> tableviewPLC) throws IOException {
-        new Thread(() -> {
-            ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
+    public synchronized void checkStatus() {
 
-            for (ProductionBlock plc : tableviewPLC) {
-                Date dNow = new Date();
-                System.out.println("Checking status of " + plc.getIpaddress() + ":" + plc.getPort());
+        for (ProductionBlock plc : this.pbMap.values()) { // Add threads
+            Date dNow = new Date();
+            System.out.println("Checking status of " + plc.getIpaddress() + ":" + plc.getPort());
 
-                PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
+            PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
 
-                // Check status of PLC
-                double temp1 = plccomm.ReadTemp1();
+            // Check status of PLC
+            double temp1 = plccomm.ReadTemp1();
 
-                if (temp1 == -1) { // No connection to PLC
-                    plc.setTemp1(-1);
-                    plc.setTemp2(-1);
-                    plc.setMoisture(-1);
-                    //currentPLC.setStatus("No connection");
-                    plc.setFanspeed(-1);
-                } else if (temp1 == -2) { // Error in returned data
-                    plc.setTemp1(-2);
-                    plc.setTemp2(-2);
-                    plc.setMoisture(-2);
-                    //currentPLC.setStatus("Data error");
-                    plc.setFanspeed(-2);
-                } else {
-                    plc.setTemp1(temp1);
-                    plc.setTemp2(plccomm.ReadTemp2());
-                    plc.setMoisture(plccomm.ReadMoist());
-                    //currentPLC.setStatus("OK");
-                    plc.setLastOK("" + ft.format(dNow));
-                }
-                plc.setLastCheck("" + ft.format(dNow));
-
-                newStatusList.add(plc);
+            if (temp1 == -1) { // No connection to PLC, !!!then why try to call methods on it?
+                plc.setTemp1(-1);
+                plc.setTemp2(-1);
+                plc.setMoisture(-1);
+                //currentPLC.setStatus("No connection");
+                plc.setFanspeed(-1);
+            } else if (temp1 == -2) { // Error in returned data
+                plc.setTemp1(-2);
+                plc.setTemp2(-2);
+                plc.setMoisture(-2);
+                //currentPLC.setStatus("Data error");
+                plc.setFanspeed(-2);
+            } else {
+                plc.setTemp1(temp1);
+                plc.setTemp2(plccomm.ReadTemp2());
+                plc.setMoisture(plccomm.ReadMoist());
+                //currentPLC.setStatus("OK");
+                plc.setLastOK("" + ft.format(dNow));
             }
-            try {
-                savePLC(newStatusList);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println("You checked the status of the PLC's ");
-        }).start();
+            plc.setLastCheck("" + ft.format(dNow));
+        }
+        /*try {
+            savePLC(newStatusList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        System.out.println("You checked the status of the PLC's ");
+
+        //this.savePLC(); // We don't have to save all of this!
+    }
+
+    @Override
+    public ArrayList<ProductionBlock> getPLCList() {
+        this.updateProductionBlockMap();
+        return new ArrayList<>(this.pbMap.values());
+    }
+
+    @Override
+    public ArrayList<ProductionBlock> getUpdatedPLCList() {
+        this.updateProductionBlockMap();
+        this.checkStatus();
+        return new ArrayList<>(this.pbMap.values());
     }
 }

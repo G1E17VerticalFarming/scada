@@ -18,6 +18,7 @@ import shared.ProductionBlock;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import scada.domain.interfaces.IScada;
 
 /**
  * FXML Controller class
@@ -26,7 +27,7 @@ import java.util.ResourceBundle;
  */
 public class ScenePLCView implements Initializable {
     public ProductionBlock plc;
-    private Scada scada = Scada.getInstance();
+    private IScada scada;
     @FXML
     private Button buttonBack, buttonUpdate, buttonSend;
     @FXML
@@ -43,7 +44,7 @@ public class ScenePLCView implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
+        this.scada = Scada.getInstance();
     }
 
     @FXML
@@ -53,7 +54,7 @@ public class ScenePLCView implements Initializable {
     }
 
     @FXML
-    private void handleButtonSetAction() throws IOException, ClassNotFoundException {
+    private void handleButtonSetAction() throws IOException, ClassNotFoundException { // INSERT INTO A GP INSTEAD AND THEN ADD IT TO THE PB!
         new Thread(() -> {
             buttonSend.setDisable(true);
             PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));

@@ -81,9 +81,11 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
                 ProductionBlock plc = (ProductionBlock) in.readObject();
                 list.add(plc);
             } catch (SocketTimeoutException exc) {
+                System.out.println("Error: " + exc);
                 // you got the timeout
                 break;
             } catch (EOFException exc) {
+                System.out.println("Error: " + exc);
                 in.close();
                 in = null;
                 break;
