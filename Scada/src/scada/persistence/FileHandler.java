@@ -117,8 +117,8 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         f.close();
     }
 
-    @Override
-    public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
+    //@Override
+    /*public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
         ArrayList<ProductionBlock> list = new ArrayList<>(readPLCFile());
         boolean found = false;
         int highestID = 0;
@@ -142,7 +142,7 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         }
 
         savePLC(list);
-    }
+    }*/
 
     @Override
     public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {

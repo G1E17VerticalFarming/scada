@@ -28,6 +28,8 @@ public class ApiSendController implements IScadaApiSend {
     }
     
     private String address = "http://localhost:8081";
+    private String myIp = "127.0.0.1";
+    private int myPort = 6660;
     
     private ApiSendController() {
         
@@ -37,7 +39,7 @@ public class ApiSendController implements IScadaApiSend {
     public ProductionBlock[] getAllProductionBlocks() {
         ProductionBlock[] pbArr;
         try {
-            pbArr = HttpOkhttpPostSend.doGetRequest(this.address + "/production_block/", ProductionBlock[].class);
+            pbArr = HttpOkhttpPostSend.doGetRequest(this.address + "/" + this.myIp + "/" + myPort + "/production_block/", ProductionBlock[].class);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return null;
@@ -49,7 +51,7 @@ public class ApiSendController implements IScadaApiSend {
     public ProductionBlock getSpecificProductionBlock(int id) {
         ProductionBlock pb;
         try {
-            pb = HttpOkhttpPostSend.doGetRequest(this.address + "/production_block/" + id, ProductionBlock.class);
+            pb = HttpOkhttpPostSend.doGetRequest(this.address + "/" + this.myIp + "/" + myPort + "/production_block/" + id, ProductionBlock.class);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return null;
@@ -62,7 +64,20 @@ public class ApiSendController implements IScadaApiSend {
         System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         String returnStr;
         try {
-            returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/production_block/", pb);
+            returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/" + this.myIp + "/" + myPort + "/production_block/", pb);
+        } catch (IOException ex) {
+            System.out.println("Something brok");
+            return "not success";
+        }
+        System.out.println(returnStr);
+        return returnStr;
+    }
+
+    @Override
+    public String deleteProductionBlock(ProductionBlock pb) {
+        String returnStr;
+        try {
+            returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/production_block/delete/", pb);
         } catch (IOException ex) {
             System.out.println("Something brok");
             return "not success";

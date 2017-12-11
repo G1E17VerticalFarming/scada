@@ -49,7 +49,8 @@ public class Scada implements IScada {
         return instance;
     }
 
-    private HashMap<Integer, ProductionBlock> pbMap;
+    //private HashMap<Integer, ProductionBlock> pbMap;
+    private ArrayList<ProductionBlock> pbList;
     private HashMap<Integer, GrowthProfile> gpMap;
     private HashMap<Integer, GrowthProfile> manualGPMap;
     private ArrayList<Log> logList;
@@ -67,11 +68,11 @@ public class Scada implements IScada {
         // Is here to prevent instantiation
 
         // Local variables
-        this.pbMap = new HashMap<>();
+        //this.pbMap = new HashMap<>();
         this.gpMap = new HashMap<>();
         this.manualGPMap = new HashMap<>();
         this.logList = new ArrayList<>();
-        this.initiateTimedAutomationTask(20000);
+        this.initiateTimedAutomationTask(2000000);
 
         this.updateProductionBlockMap();
         this.updateGrowthProfileMap();
@@ -82,21 +83,25 @@ public class Scada implements IScada {
 
     @Override
     public synchronized void savePLC(ProductionBlock plc) {
-        plc.setId(101);
-        this.pbMap.put(plc.getId(), plc);
+        plc.setId(-1);
+        this.pbList.add(plc);
         this.savePLC();
     }
 
     private synchronized void savePLC() {
         try {
-            this.readWriteProductionBlock.savePLC(new ArrayList<>(this.pbMap.values()));
+            this.readWriteProductionBlock.savePLC(this.pbList);
         } catch (IOException ex) {
             System.out.println("Error: " + ex);
         }
 
         if (this.apiSend.ping()) {
-            this.pbMap.values().parallelStream().forEach((ProductionBlock pb) -> {
-                this.apiSend.saveProductionBlock(pb);
+            this.pbList.parallelStream().forEach((ProductionBlock pb) -> {
+                if(pb.getId() == -1) {
+                    this.apiSend.saveProductionBlock(pb);
+                } else if(pb.getId() == -2) {
+                    this.apiSend.deleteProductionBlock(pb);
+                }
             });
         }
     }
@@ -122,12 +127,12 @@ public class Scada implements IScada {
 
     @Override
     public void removePLC(int plcToRemove) {
-        this.pbMap.remove(plcToRemove);
-        try {
-            this.readWriteProductionBlock.savePLC(new ArrayList<>(this.pbMap.values()));
-        } catch (IOException ex) {
-            System.out.println("Error: " + ex);
+        for(ProductionBlock pb : this.pbList) {
+            if(pb.getId() == plcToRemove) {
+                pb.setId(-2);
+            }
         }
+        this.savePLC();
     }
 
     private void initiateTimedAutomationTask(long time) {
@@ -154,7 +159,7 @@ public class Scada implements IScada {
             secondsSinceMidnight += (40000 * this.debugCount++);
             secondsSinceMidnight = secondsSinceMidnight % 86400;
 
-            for (ProductionBlock pb : this.pbMap.values()) {
+            for (ProductionBlock pb : this.pbList) {
                 //this.updateLightLevel(pb);
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
 
@@ -186,9 +191,7 @@ public class Scada implements IScada {
 
         System.out.println("TEST" + pbList.size());
 
-        for (ProductionBlock pb : pbList) {
-            this.pbMap.put(pb.getId(), pb);
-        }
+        this.pbList = pbList;
     }
 
     private synchronized void updateGrowthProfileMap() {
@@ -264,6 +267,7 @@ public class Scada implements IScada {
                 highestId = integer;
             }
         }
+        gp.setId(highestId * -1);
         this.manualGPMap.put(highestId, gp);
         this.saveGrowthProfiles();
         return highestId;
@@ -310,7 +314,8 @@ public class Scada implements IScada {
 
     public synchronized void checkStatus() {
 
-        for (ProductionBlock plc : this.pbMap.values()) { // Add threads
+        //for (ProductionBlock plc : this.pbList) { // Add threads
+        this.pbList.parallelStream().forEach((ProductionBlock plc) -> {
             Date dNow = new Date();
             System.out.println("Checking status of " + plc.getIpaddress() + ":" + plc.getPort());
 
@@ -319,7 +324,7 @@ public class Scada implements IScada {
             // Check status of PLC
             double temp1 = plccomm.ReadTemp1();
 
-            if (temp1 == -1) { // No connection to PLC, !!!then why try to call methods on it?
+            if (temp1 == -1) { // No connection to PLC
                 plc.setTemp1(-1);
                 plc.setTemp2(-1);
                 plc.setMoisture(-1);
@@ -339,7 +344,7 @@ public class Scada implements IScada {
                 plc.setLastOK("" + ft.format(dNow));
             }
             plc.setLastCheck("" + ft.format(dNow));
-        }
+        });
         /*try {
             savePLC(newStatusList);
         } catch (IOException e) {
@@ -353,13 +358,13 @@ public class Scada implements IScada {
     @Override
     public ArrayList<ProductionBlock> getPLCList() {
         this.updateProductionBlockMap();
-        return new ArrayList<>(this.pbMap.values());
+        return this.pbList;
     }
 
     @Override
     public ArrayList<ProductionBlock> getUpdatedPLCList() {
         this.updateProductionBlockMap();
         this.checkStatus();
-        return new ArrayList<>(this.pbMap.values());
+        return this.pbList;
     }
 }

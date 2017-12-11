@@ -19,7 +19,7 @@ public class Json {
      * passed into the parameter.
      *
      * @param <T> returned type of the request
-     * @param fileSource where to read the file from
+     * @param json where to read the file from
      * @param classType which type to return
      * @return a new object of the type that was set with the parameter
      * classType
