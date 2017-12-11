@@ -5,29 +5,25 @@
  */
 package scada.gui;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
 /**
  * FXML Controller class
- *
- * @author mads
+ * Used for the login scene. Currently not operational
  */
 public class SceneLoginController implements Initializable {
 
     @FXML
-    private TextField usernameTextField;
+    private TextField usernameTextField, passwordTextField;
     @FXML
-    private TextField passwordTextField;
-    @FXML
-    private Button cancelButton;
-    @FXML
-    private Button loginButton;
+    private Button cancelButton, loginButton;
 
     /**
      * Initializes the controller class.
@@ -39,10 +35,12 @@ public class SceneLoginController implements Initializable {
 
     @FXML
     private void handleCancelButtonAction(ActionEvent event) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @FXML
     private void handleLoginButtonAction(ActionEvent event) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

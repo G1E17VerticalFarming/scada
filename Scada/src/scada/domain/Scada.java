@@ -27,32 +27,25 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
- * @author chris
+ * Class used to create a domain layer object of the SCADA. This class ties GUI and Persistence-layer together.
  */
 public class Scada implements IScada {
 
+    private static Scada instance = null;
     private ReadWriteProductionBlock readWriteProductionBlock;
     private ReadWriteLog readWriteLog;
     private ReadWriteGrowthProfile readWriteGrowthProfile;
-    
-    private static Scada instance = null;
-
-    public static Scada getInstance() {
-        if (instance == null) {
-            instance = new Scada();
-        }
-        return instance;
-    }
-
     private HashMap<Integer, ProductionBlock> pbMap;
     private HashMap<Integer, GrowthProfile> gpMap;
     private HashMap<Integer, GrowthProfile> manualGPMap;
     private ArrayList<Log> logList;
     private boolean continueAutomation = true;
-    
     private int debugCount = 0;
     private SimpleDateFormat ft = new SimpleDateFormat("dd/MM-yyyy HH:mm:ss");
 
+    /**
+     * Singleton instantiation of the class, so there can only ever be one instance.
+     */
     protected Scada() {
         this.readWriteProductionBlock = FileHandler.getInstance();
         this.readWriteLog = FileHandler.getInstance();
@@ -65,9 +58,19 @@ public class Scada implements IScada {
         this.manualGPMap = new HashMap<>();
         this.logList = new ArrayList<>();
         this.initiateTimedAutomationTask(20000);
-        
+
         //Debugs
         this.debugAdd();
+    }
+
+    /**
+     * Used for getting the single instance of SCADA
+     */
+    public static Scada getInstance() {
+        if (instance == null) {
+            instance = new Scada();
+        }
+        return instance;
     }
 
     @Override
@@ -77,12 +80,12 @@ public class Scada implements IScada {
 
     @Override
     public List<shared.ProductionBlock> getProductionBlocks() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean setProduction(String productionBlock, String growthProfile) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -116,23 +119,23 @@ public class Scada implements IScada {
 
     private void doAutomation() {
         System.out.println("Starting updates!");
-        if(this.continueAutomation) {
+        if (this.continueAutomation) {
             this.updateProductionBlockMap();
 
             ZonedDateTime now = ZonedDateTime.now();
             ZonedDateTime midnight = now.truncatedTo(ChronoUnit.DAYS);
             Duration duration = Duration.between(midnight, now);
             long secondsSinceMidnight = duration.getSeconds();
-            
+
             secondsSinceMidnight = 0;
-            
+
             secondsSinceMidnight += (40000 * this.debugCount++);
             secondsSinceMidnight = secondsSinceMidnight % 86400;
 
             for (ProductionBlock pb : this.pbMap.values()) {
                 //this.updateLightLevel(pb);
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
-                
+
                 AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
                 if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
@@ -148,16 +151,16 @@ public class Scada implements IScada {
         // pbArr = API.getBlaBlaBla();
 
         // For debug
-        
+
         System.out.println("Updating pbMap");
         ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
         pbArr[0].setGrowthConfigId(1);
-        
-        for(int i = 0; i < pbArr.length; i++) {
+
+        for (int i = 0; i < pbArr.length; i++) {
             this.pbMap.put(pbArr[i].getId(), pbArr[i]);
         }
     }
-    
+
     public void debugAdd() {
         // Fetch list from MES, if not, just use what you have
         // pbArr = API.getBlaBlaBla();
@@ -183,9 +186,9 @@ public class Scada implements IScada {
         gpList.get(0).setNightTemperature(15);
         gpList.get(0).setTemperature(25);
         gpList.get(0).setWaterLevel(20);
-        
+
         this.addGrowthProfile(gpList.get(0));
-        
+
         //GrowthProfile[] gpArr = gpList.toArray(new GrowthProfile[0]);
         
         /*for(int i = 0; i < gpArr.length; i++) {
@@ -193,8 +196,8 @@ public class Scada implements IScada {
         }
         
         this.saveGrowthProfiles();*/
-        
-        
+
+
         List<Log> logList1 = new ArrayList<>();
         logList1.add(new Log());
         logList1.get(0).setValue("testing cunts");
@@ -202,16 +205,16 @@ public class Scada implements IScada {
         this.addLog(logList1.get(0));
         this.saveLogs();
     }
-    
+
     public void addGrowthProfile(GrowthProfile gp) {
         this.gpMap.put(gp.getId(), gp);
         this.saveGrowthProfiles();
     }
-    
+
     public int addManualGrowthProfile(GrowthProfile gp) {
         int highestId = 1;
-        for(Integer integer : this.manualGPMap.keySet()) {
-            if(integer > highestId) {
+        for (Integer integer : this.manualGPMap.keySet()) {
+            if (integer > highestId) {
                 highestId = integer;
             }
         }
@@ -219,29 +222,29 @@ public class Scada implements IScada {
         this.saveGrowthProfiles();
         return highestId;
     }
-    
+
     private void saveGrowthProfiles() {
         Set<GrowthProfile> gpSet = new HashSet<>();
         gpSet.addAll(new HashSet<>(this.manualGPMap.values()));
         gpSet.addAll(this.gpMap.values());
-        
+
         try {
             this.readWriteGrowthProfile.writeGrowthProfileFile(new ArrayList<>(gpSet));
         } catch (IOException ex) {
             System.out.println(ex);
         }
     }
-    
+
     public void addLog(Log log) {
         this.logList.add(log);
         this.saveLogs();
     }
-    
+
     public void clearLogList() {
         this.logList.clear();
         this.saveLogs();
     }
-    
+
     private void saveLogs() {
         try {
             this.readWriteLog.writeLogFile(this.logList);
@@ -249,16 +252,20 @@ public class Scada implements IScada {
             System.out.println(ex);
         }
     }
-    
+
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
         //Probalby should check whether selectedGp is null
-        if(pb.getManualGrowthConfigId() > 0) {
+        if (pb.getManualGrowthConfigId() > 0) {
             return this.gpMap.get(pb.getGrowthConfigId());
         } else {
             return this.gpMap.get(pb.getManualGrowthConfigId());
         }
     }
 
+    /**
+     * @param tableviewPLC
+     * @throws IOException
+     */
     public synchronized void checkStatus(ArrayList<ProductionBlock> tableviewPLC) throws IOException {
         new Thread(() -> {
             ArrayList<ProductionBlock> newStatusList = new ArrayList<>();
