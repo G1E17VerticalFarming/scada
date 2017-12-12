@@ -6,13 +6,12 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- *
- * @author DanielToft
+ * TODO WRITE ME
  */
 public interface ReadWriteGrowthProfile {
 
     List<GrowthProfile> readGrowthProfileFile() throws IOException, ClassNotFoundException;
 
     void writeGrowthProfileFile(List<GrowthProfile> gpList) throws IOException;
-    
+
 }

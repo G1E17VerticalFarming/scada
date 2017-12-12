@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.gui;
 
 import javafx.collections.FXCollections;
@@ -162,7 +157,7 @@ public class SceneScadaController implements Initializable {
     }
 
     /**
-     * Method used for updating the timer label. When end is reached, it calls checkStatus()
+     * Method used for updating the timer label. When end is reached, it calls checkStatus() and resets the counter
      */
     private void startTimer() throws InterruptedException {
         new Thread(() -> {

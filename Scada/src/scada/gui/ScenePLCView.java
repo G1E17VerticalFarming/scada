@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.gui;
 
 import PLCCommunication.PLC;
@@ -42,7 +37,6 @@ public class ScenePLCView implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-
     }
 
     /**
@@ -60,19 +54,25 @@ public class ScenePLCView implements Initializable {
     @FXML
     private void handleButtonSetAction() throws IOException, ClassNotFoundException {
         new Thread(() -> {
+            //Disable "set" button so user can't create more threads while this one runs
             buttonSend.setDisable(true);
+
+            //Start new PLC connection based on information from current production block
             PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
 
-            //IF PLC CAN BE CONTACTED
+            //If production block is on then start sending setpoints
             if (plccomm.SetTemperature(temp1Spinner.getValueFactory().getValue())) {
+                //Set blue light value
                 if (lightBlueSpinner.getValueFactory().getValue() >= 0 && lightBlueSpinner.getValueFactory().getValue() <= 100) {
                     plccomm.SetBlueLight(lightBlueSpinner.getValueFactory().getValue());
                 }
+                //Set red light value
                 if (lightRedSpinner.getValueFactory().getValue() >= 0 && lightRedSpinner.getValueFactory().getValue() <= 100) {
                     plccomm.SetRedLight(lightRedSpinner.getValueFactory().getValue());
                 }
+                //turn on water for x seconds
                 plccomm.AddWater(waterSpinner.getValueFactory().getValue());
-
+                //set fanspeed
                 switch (fanSpeed.getSelectionModel().getSelectedItem().toString()) {
                     case "Off":
                         plccomm.SetFanSpeed(0);
@@ -86,21 +86,22 @@ public class ScenePLCView implements Initializable {
                     default:
                         plccomm.SetFanSpeed(0);
                 }
+                //Update status label so user knows it succeeded
                 Platform.runLater(() -> status.setText("SUCCESS: Setpoints blev sendt til PLC'en"));
-                System.out.println("*****Setpoints sent to PLC*****");
+                System.out.println("SUCCESS: Setpoints blev sendt til PLC'en");
             } else {
+                //Update status label so user knows it failed
                 Platform.runLater(() -> status.setText("FEJL: PLC kunne ikke kontaktes. Tjek indstillinger"));
-                System.out.println("*****Setpoints sent to PLC*****");
+                System.out.println("FEJL: PLC kunne ikke kontaktes. Tjek indstillinger");
             }
-            buttonSend.setDisable(false);
+            buttonSend.setDisable(false); //Reenable "set" button again.
         }).start();
 
     }
 
     /**
-     * Method needed upon calling the scene. Populates all labels and spinners with current values.
-     *
-     * @param plc
+     * Method needed upon calling the scene. Populates all labels and spinners with current values
+     * @param plc The production block that the scene should take information from
      */
     public void populatePLC(ProductionBlock plc) {
         this.plc = plc;
