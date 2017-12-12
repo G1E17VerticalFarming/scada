@@ -142,7 +142,7 @@ public class SceneScadaController implements Initializable {
     public synchronized void removePLC() throws IOException, ClassNotFoundException {
         if (tableviewPLC.getSelectionModel().getSelectedItem() != null) {
             ProductionBlock selectedPLC = tableviewPLC.getSelectionModel().getSelectedItem();
-            scada.removePLC(selectedPLC.getId());
+            scada.removePLC(selectedPLC);
             populateListView();
         }
     }

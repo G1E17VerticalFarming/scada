@@ -117,6 +117,28 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         f.close();
     }
 
+    @Override
+    public void saveUpdatePLCList(ArrayList<ProductionBlock> pbList) throws IOException {
+        if(this.resourcesDir.isEmpty()) {
+            System.out.println("Error: could not write file as there is found no valid path!");
+            return;
+        }
+        
+        ProductionBlock[] pbArr = pbList.toArray(new ProductionBlock[0]);
+        JsonEncoder.stringifyObject(this.resourcesDir + "/pbUpdateList.json", pbArr);
+    }
+
+    @Override
+    public void saveDeletePLCList(ArrayList<ProductionBlock> pbList) throws IOException {
+        if(this.resourcesDir.isEmpty()) {
+            System.out.println("Error: could not write file as there is found no valid path!");
+            return;
+        }
+        
+        ProductionBlock[] pbArr = pbList.toArray(new ProductionBlock[0]);
+        JsonEncoder.stringifyObject(this.resourcesDir + "/pbDeleteList.json", pbArr);
+    }
+
     //@Override
     /*public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
         ArrayList<ProductionBlock> list = new ArrayList<>(readPLCFile());

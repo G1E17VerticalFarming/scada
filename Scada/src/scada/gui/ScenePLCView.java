@@ -54,7 +54,7 @@ public class ScenePLCView implements Initializable {
     }
 
     @FXML
-    private void handleButtonSetAction() throws IOException, ClassNotFoundException { // INSERT INTO A GP INSTEAD AND THEN ADD IT TO THE PB!
+    private void handleButtonSetAction() { // INSERT INTO A GP INSTEAD AND THEN ADD IT TO THE PB!
         new Thread(() -> {
             buttonSend.setDisable(true);
             PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
@@ -103,16 +103,16 @@ public class ScenePLCView implements Initializable {
     }
 
     @FXML
-    private void onEnter() throws IOException, ClassNotFoundException {
+    private void onEnter() {
         updatePLC();
     }
 
     @FXML
-    private void updatePLC() throws IOException, ClassNotFoundException {
+    private void updatePLC() {
         plc.setName(plcName.getText());
         plc.setPort(Integer.parseInt(plcPort.getText()));
         plc.setIpaddress(plcIP.getText());
-        scada.savePLC(plc);
+        this.scada.updatePLC(plc);
 
         Stage stage = (Stage) buttonUpdate.getScene().getWindow();
         stage.close();

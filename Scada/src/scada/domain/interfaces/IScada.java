@@ -15,6 +15,8 @@ public interface IScada {
     ArrayList<ProductionBlock> getUpdatedPLCList();
 
     void savePLC(ProductionBlock plc);
+    
+    void updatePLC(ProductionBlock pb);
 
-    void removePLC(int plcToRemove);
+    void removePLC(ProductionBlock pb);
 }

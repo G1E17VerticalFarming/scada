@@ -51,6 +51,8 @@ public class Scada implements IScada {
 
     //private HashMap<Integer, ProductionBlock> pbMap;
     private ArrayList<ProductionBlock> pbList;
+    private ArrayList<ProductionBlock> pbUpdateList;
+    private ArrayList<ProductionBlock> pbDeleteList;
     private HashMap<Integer, GrowthProfile> gpMap;
     private HashMap<Integer, GrowthProfile> manualGPMap;
     private ArrayList<Log> logList;
@@ -69,6 +71,8 @@ public class Scada implements IScada {
 
         // Local variables
         //this.pbMap = new HashMap<>();
+        this.pbUpdateList = new ArrayList<>();
+        this.pbDeleteList = new ArrayList<>();
         this.gpMap = new HashMap<>();
         this.manualGPMap = new HashMap<>();
         this.logList = new ArrayList<>();
@@ -84,26 +88,40 @@ public class Scada implements IScada {
     @Override
     public synchronized void savePLC(ProductionBlock plc) {
         plc.setId(-1);
+        this.pbUpdateList.add(plc);
         this.pbList.add(plc);
         this.savePLC();
     }
+    
+    @Override
+    public synchronized void updatePLC(ProductionBlock plc) {
+        this.pbUpdateList.add(plc);
+    }
+
+    @Override
+    public synchronized void removePLC(ProductionBlock pb) {
+        this.pbDeleteList.add(pb);
+    }
 
     private synchronized void savePLC() {
+        
         try {
             this.readWriteProductionBlock.savePLC(this.pbList);
         } catch (IOException ex) {
             System.out.println("Error: " + ex);
         }
 
-        if (this.apiSend.ping()) {
+        /*if (this.apiSend.ping()) {
             this.pbList.parallelStream().forEach((ProductionBlock pb) -> {
                 if(pb.getId() == -1) {
                     this.apiSend.saveProductionBlock(pb);
                 } else if(pb.getId() == -2) {
                     this.apiSend.deleteProductionBlock(pb);
+                } else if(pb.getId() == -3) {
+                    
                 }
             });
-        }
+        }*/
     }
 
     //@Override
@@ -123,16 +141,6 @@ public class Scada implements IScada {
             System.out.println(ex);
             return new ArrayList<>();
         }
-    }
-
-    @Override
-    public void removePLC(int plcToRemove) {
-        for(ProductionBlock pb : this.pbList) {
-            if(pb.getId() == plcToRemove) {
-                pb.setId(-2);
-            }
-        }
-        this.savePLC();
     }
 
     private void initiateTimedAutomationTask(long time) {
@@ -160,6 +168,9 @@ public class Scada implements IScada {
             secondsSinceMidnight = secondsSinceMidnight % 86400;
 
             for (ProductionBlock pb : this.pbList) {
+                if(pb.getGrowthConfigId() <= 0) {
+                    continue;
+                }
                 //this.updateLightLevel(pb);
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
 
@@ -184,6 +195,24 @@ public class Scada implements IScada {
         ArrayList<ProductionBlock> pbList;
 
         if (this.apiSend.ping()) {
+            if(!this.pbUpdateList.isEmpty()) {
+                //If one or more of the updateProductionBlock calls fails, it will still delete the list. 
+                // This will require some extra exception handling to make it robust.
+                this.pbUpdateList.parallelStream().forEach((ProductionBlock pb) -> {
+                    if(pb.getId() < 0) {
+                        this.apiSend.saveProductionBlock(pb);
+                    } else {
+                        this.apiSend.updateProductionBlock(pb);
+                    }
+                });
+                this.pbUpdateList.clear();
+            }
+            if(!this.pbDeleteList.isEmpty()) {
+                //If one or more of the updateProductionBlock calls fails, it will still delete the list. 
+                // This will require some extra exception handling to make it robust.
+                this.pbDeleteList.parallelStream().forEach((ProductionBlock pb) -> this.apiSend.deleteProductionBlock(pb));
+                this.pbDeleteList.clear();
+            }
             pbList = new ArrayList<>(Arrays.asList(this.apiSend.getAllProductionBlocks()));
         } else {
             pbList = this.readPLCList();
@@ -192,6 +221,7 @@ public class Scada implements IScada {
         System.out.println("TEST" + pbList.size());
 
         this.pbList = pbList;
+        this.savePLC();
     }
 
     private synchronized void updateGrowthProfileMap() {
@@ -306,6 +336,15 @@ public class Scada implements IScada {
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
         //Probalby should check whether selectedGp is null
         if (pb.getManualGrowthConfigId() > 0) {
+            if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
+                GrowthProfile fetchedGp;
+                if(this.apiSend.ping()) {
+                    fetchedGp = this.apiSend.getSpecificGrowthProfile(pb.getGrowthConfigId());
+                    this.gpMap.put(fetchedGp.getId(), fetchedGp);
+                } else {
+                    return null;
+                }
+            }
             return this.gpMap.get(pb.getGrowthConfigId());
         } else {
             return this.gpMap.get(pb.getManualGrowthConfigId());

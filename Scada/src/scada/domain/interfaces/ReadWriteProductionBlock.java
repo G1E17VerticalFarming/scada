@@ -21,6 +21,10 @@ public interface ReadWriteProductionBlock {
     List<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException;
 
     void savePLC(ArrayList<ProductionBlock> plcList) throws IOException; // Save multiple PLC's to file
+    
+    void saveUpdatePLCList(ArrayList<ProductionBlock> pbList) throws IOException;
+    
+    void saveDeletePLCList(ArrayList<ProductionBlock> pbList) throws IOException;
 
     //void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException; // Save single PLC to file
 

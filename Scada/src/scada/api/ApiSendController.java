@@ -41,7 +41,7 @@ public class ApiSendController implements IScadaApiSend {
         try {
             pbArr = HttpOkhttpPostSend.doGetRequest(this.address + "/" + this.myIp + "/" + myPort + "/production_block/", ProductionBlock[].class);
         } catch (IOException ex) {
-            System.out.println("Something brok");
+            System.out.println("APB: Something brok." + ex);
             return null;
         }
         return pbArr;
@@ -74,12 +74,25 @@ public class ApiSendController implements IScadaApiSend {
     }
 
     @Override
+    public String updateProductionBlock(ProductionBlock pb) {
+        String returnStr;
+        try {
+            returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/production_block/update/", pb);
+        } catch (IOException ex) {
+            System.out.println("UPB: Something brok." + ex);
+            return "not success";
+        }
+        System.out.println(returnStr);
+        return returnStr;
+    }
+
+    @Override
     public String deleteProductionBlock(ProductionBlock pb) {
         String returnStr;
         try {
             returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/production_block/delete/", pb);
         } catch (IOException ex) {
-            System.out.println("Something brok");
+            System.out.println("DPB: Something brok." + ex);
             return "not success";
         }
         System.out.println(returnStr);

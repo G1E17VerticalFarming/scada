@@ -20,6 +20,8 @@ public interface IScadaApiSend {
     
     public String saveProductionBlock(ProductionBlock pb);
     
+    public String updateProductionBlock(ProductionBlock pb);
+    
     public String deleteProductionBlock(ProductionBlock pb);
     
     public GrowthProfile getSpecificGrowthProfile(int id);
