@@ -5,7 +5,7 @@
  */
 package scada.domain;
 
-//import scada.persistence.ProductionBlock;
+
 import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
 import scada.domain.interfaces.IScada;
@@ -14,7 +14,6 @@ import scada.domain.interfaces.ReadWriteLog;
 import scada.domain.interfaces.ReadWriteProductionBlock;
 import scada.persistence.FileHandler;
 import shared.GrowthProfile;
-import shared.Light;
 import shared.Log;
 import shared.ProductionBlock;
 
@@ -24,8 +23,6 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import scada.api.ApiSendController;
 import scada.domain.interfaces.IScadaApiSend;
 
@@ -76,13 +73,10 @@ public class Scada implements IScada {
         this.gpMap = new HashMap<>();
         this.manualGPMap = new HashMap<>();
         this.logList = new ArrayList<>();
-        this.initiateTimedAutomationTask(2000000);
+        this.initiateTimedAutomationTask(20000);
 
         this.updateProductionBlockMap();
-        this.updateGrowthProfileMap();
-
-        //Debugs
-        this.debugAdd();
+        //this.updateGrowthProfileMap();
     }
 
     @Override
@@ -175,6 +169,8 @@ public class Scada implements IScada {
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
 
                 AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
+                System.out.println("PB: " + pb);
+                System.out.println("GP: " + selectedGp);
                 if (!ap.doUpdates()) {
                     System.out.println("ProductionBlock id " + pb.getId() + ": Failed to do updates!");
                 } else {
@@ -222,6 +218,7 @@ public class Scada implements IScada {
 
         this.pbList = pbList;
         this.savePLC();
+        this.updateGrowthProfileMap();
     }
 
     private synchronized void updateGrowthProfileMap() {
@@ -233,62 +230,34 @@ public class Scada implements IScada {
         List<GrowthProfile> gbList;
 
         gbList = this.readGbList();
-
+        
         for (GrowthProfile gp : gbList) {
+            System.out.println("gp..." + gp.getId());
             if (gp.getId() >= 0) {
                 this.gpMap.put(gp.getId(), gp);
             } else {
                 this.manualGPMap.put(gp.getId(), gp);
             }
         }
-    }
-
-    public void debugAdd() {
-        // Fetch list from MES, if not, just use what you have
-        // pbArr = API.getBlaBlaBla();
-
-        // For debug
-        List<GrowthProfile> gpList = new ArrayList<>();
-        gpList.add(new GrowthProfile());
-        gpList.get(0).setId(1);
-        ArrayList<Light> lightList = new ArrayList<>();
-        lightList.add(new Light());
-        lightList.get(0).setId(0);
-        lightList.get(0).setType(3);
-        lightList.get(0).setPowerLevel(100);
-        lightList.get(0).setRunTimeUnix(43200);
-        lightList.add(new Light());
-        lightList.get(1).setId(1);
-        lightList.get(1).setType(1);
-        lightList.get(1).setPowerLevel(100);
-        lightList.get(1).setRunTimeUnix(33200);
-        gpList.get(0).setLightSequence(lightList);
-        gpList.get(0).setMoisture(50);
-        gpList.get(0).setName("testing gp");
-        gpList.get(0).setNightTemperature(15);
-        gpList.get(0).setTemperature(25);
-        gpList.get(0).setWaterLevel(20);
-
-        this.addGrowthProfile(gpList.get(0));
-
-        //GrowthProfile[] gpArr = gpList.toArray(new GrowthProfile[0]);
-        /*for(int i = 0; i < gpArr.length; i++) {
-            this.gpMap.put(gpArr[i].getId(), gpArr[i]);
-        }
         
-        this.saveGrowthProfiles();*/
-        List<Log> logList1 = new ArrayList<>();
-        logList1.add(new Log());
-        logList1.get(0).setValue("testing cunts");
-        logList1.get(0).setCmd(27);
-        this.addLog(logList1.get(0));
-        this.saveLogs();
+        for(ProductionBlock pb : this.pbList) {
+            System.out.println("Required GP: " + pb.getGrowthConfigId());
+            if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
+                if(pb.getGrowthConfigId() == 0) {
+                    continue;
+                }
+                GrowthProfile gp = this.apiSend.getSpecificGrowthProfile(pb.getGrowthConfigId());
+                this.gpMap.put(gp.getId(), gp);
+            }
+        }
+        this.saveGrowthProfiles();
     }
 
-    public void addGrowthProfile(GrowthProfile gp) {
+    /*public void addGrowthProfile(GrowthProfile gp) {
         this.gpMap.put(gp.getId(), gp);
         this.saveGrowthProfiles();
     }
+    */
 
     public int addManualGrowthProfile(GrowthProfile gp) {
         int highestId = 1;
@@ -335,7 +304,8 @@ public class Scada implements IScada {
 
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
         //Probalby should check whether selectedGp is null
-        if (pb.getManualGrowthConfigId() > 0) {
+        System.out.println("man" + pb.getManualGrowthConfigId());
+        if (pb.getManualGrowthConfigId() == 0) {
             if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
                 GrowthProfile fetchedGp;
                 if(this.apiSend.ping()) {
@@ -347,6 +317,7 @@ public class Scada implements IScada {
             }
             return this.gpMap.get(pb.getGrowthConfigId());
         } else {
+            System.out.println("COMES HERE?!");
             return this.gpMap.get(pb.getManualGrowthConfigId());
         }
     }
@@ -367,19 +338,19 @@ public class Scada implements IScada {
                 plc.setTemp1(-1);
                 plc.setTemp2(-1);
                 plc.setMoisture(-1);
-                //currentPLC.setStatus("No connection");
+                plc.setStatus("No connection");
                 plc.setFanspeed(-1);
             } else if (temp1 == -2) { // Error in returned data
                 plc.setTemp1(-2);
                 plc.setTemp2(-2);
                 plc.setMoisture(-2);
-                //currentPLC.setStatus("Data error");
+                plc.setStatus("Data error");
                 plc.setFanspeed(-2);
             } else {
                 plc.setTemp1(temp1);
                 plc.setTemp2(plccomm.ReadTemp2());
                 plc.setMoisture(plccomm.ReadMoist());
-                //currentPLC.setStatus("OK");
+                plc.setStatus("OK");
                 plc.setLastOK("" + ft.format(dNow));
             }
             plc.setLastCheck("" + ft.format(dNow));

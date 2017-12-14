@@ -92,6 +92,7 @@ public class HttpOkhttpPostSend {
             throw new IOException("Error[" + response.code() + "]: NullPointerException on response.body()");
         }
         if(response.code() == 200) {
+            //System.out.println(response.body().string());
             return Json.getJSON(response.body().string(), classType);
         }
         throw new IOException("Error[" + response.code() + "]: " + response.body().string());

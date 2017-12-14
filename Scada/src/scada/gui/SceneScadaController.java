@@ -32,8 +32,8 @@ import scada.domain.interfaces.IScada;
 public class SceneScadaController implements Initializable {
 
     private IScada scada = Scada.getInstance();
-    private ObservableList<ProductionBlock> PLCTable;
-    private final Integer countDownTime = 3000; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
+    private final ObservableList<ProductionBlock> PLCTable = FXCollections.observableArrayList();
+    private final Integer countDownTime = 30; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
@@ -68,7 +68,6 @@ public class SceneScadaController implements Initializable {
         PLC_lastOK.setCellValueFactory(new PropertyValueFactory("lastOK"));
         PLC_ETA.setCellValueFactory(new PropertyValueFactory("estimatedDone"));
 
-        PLCTable = FXCollections.observableArrayList();
         tableviewPLC.setItems(PLCTable);
 
         populateListView();
@@ -81,8 +80,10 @@ public class SceneScadaController implements Initializable {
     private void populateListView() {
         ArrayList<ProductionBlock> plcList = scada.getPLCList();
         System.out.println("PLC SIZE:" + plcList.size());
-        PLCTable.clear();
-        PLCTable.addAll(plcList);
+        synchronized(PLCTable) {
+            PLCTable.clear();
+            PLCTable.addAll(plcList);
+        }
 
         tableviewPLC.refresh();
         //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
@@ -125,9 +126,15 @@ public class SceneScadaController implements Initializable {
     }
 
     public synchronized void checkStatus() {
-        ArrayList<ProductionBlock> plcList = scada.getUpdatedPLCList();
-        PLCTable.clear();
-        PLCTable.addAll(plcList);
+        ArrayList<ProductionBlock> plcList = new ArrayList<>();
+        new Thread(() -> {
+        plcList.addAll(scada.getUpdatedPLCList());
+        
+        synchronized(PLCTable) {
+            PLCTable.clear();
+            PLCTable.addAll(plcList);
+        }
+        }).start();
 
         tableviewPLC.refresh();
         //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();

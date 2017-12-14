@@ -34,6 +34,10 @@ public class AutomationProcess {
     }
     
     public boolean doUpdates() {
+        if(this.pb == null || this.gp == null) {
+            return false;
+        }
+        
         this.updateProductionBlockAttributes();
         this.updateLightLevel();
         this.updateWaterLevel();

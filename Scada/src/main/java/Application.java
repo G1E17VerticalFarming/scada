@@ -14,7 +14,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 // mvn spring-boot:run
-// mvn install:install-file -Dfile={dir}.jar -DgroupId=API -DartifactId=api -Dversion=1.0 -Dpackaging=jar
+// mvn install:install-file -Dfile={dir}.jar -DgroupId=FLIB -DartifactId=flib -Dversion=1.4 -Dpackaging=jar
 
 /**
  *

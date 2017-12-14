@@ -30,6 +30,7 @@ public class Json {
             return mapper.readValue(json, classType);
         } catch (IOException e) {
             System.out.println(e);
+            System.out.println(json);
             return null;
         }
     }
