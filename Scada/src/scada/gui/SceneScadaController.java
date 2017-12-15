@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.gui;
 
 import javafx.collections.FXCollections;
@@ -29,6 +24,10 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 import scada.domain.interfaces.IScada;
 
+/**
+ * FXML Controller class Primary scene of the SCADA program. Used for getting
+ * overview of all production blocks.
+ */
 public class SceneScadaController implements Initializable {
 
     private IScada scada = Scada.getInstance();
@@ -48,6 +47,10 @@ public class SceneScadaController implements Initializable {
     @FXML
     private TextField labelTimer;
 
+    /**
+     * Method used for shutting down all threads when program closes. If
+     * removed, will cause threads to remain open upon exiting program.
+     */
     public static void shutdown() {
         System.exit(0);
     }
@@ -55,7 +58,6 @@ public class SceneScadaController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         this.scada = Scada.getInstance();
-
         PLC_ID.setCellValueFactory(new PropertyValueFactory<>("id"));
         PLC_IP.setCellValueFactory(new PropertyValueFactory<>("ipaddress"));
         PLC_port.setCellValueFactory(new PropertyValueFactory<>("port"));
@@ -68,85 +70,97 @@ public class SceneScadaController implements Initializable {
         PLC_lastOK.setCellValueFactory(new PropertyValueFactory("lastOK"));
         PLC_ETA.setCellValueFactory(new PropertyValueFactory("estimatedDone"));
 
+        //Get currently selected item, and retain selection after updating tableview
+        int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
         tableviewPLC.setItems(PLCTable);
 
         populateListView();
-        startTimer(); //Start the startTimer for countdown
-
-        //PLCTable = FXCollections.observableArrayList(plcList);
-        //tableviewPLC.setItems(PLCTable);
+        startTimer();
     }
 
     private void populateListView() {
         ArrayList<ProductionBlock> plcList = scada.getPLCList();
         System.out.println("PLC SIZE:" + plcList.size());
-        synchronized(PLCTable) {
+        synchronized (PLCTable) {
             PLCTable.clear();
             PLCTable.addAll(plcList);
         }
 
         tableviewPLC.refresh();
-        //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
-        //tableviewPLC.getSelectionModel().select(currentSelectionIndex);
 
         System.out.println("PLC's loaded (if any)");
     }
 
-    public synchronized void openPLC() throws IOException, ClassNotFoundException {
-        Stage stageAddPLC = new Stage();
-        stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("scene_plcview.fxml"));
-        Parent root = fxmlLoader.load();
-        Scene scene = new Scene(root);
-
-        ScenePLCView controller = fxmlLoader.getController();
-        System.out.println("Passing object: " + tableviewPLC.getSelectionModel().getSelectedItem().getName());
-        ProductionBlock plc = tableviewPLC.getSelectionModel().getSelectedItem();
-        controller.populatePLC(plc);
-
-        stageAddPLC.setScene(scene);
-        stageAddPLC.initStyle(StageStyle.UTILITY);
-        stageAddPLC.showAndWait();
-
-        populateListView();
+    /**
+     * Method used to open ScenePLCView, where the user can change settings of
+     * the production block
+     */
+    public synchronized void openPLC() {
+        try {
+            Stage stageAddPLC = new Stage();
+            stageAddPLC.initModality(Modality.APPLICATION_MODAL);
+            
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getClassLoader().getResource("scene_plcview.fxml"));
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root);
+            
+            ScenePLCView controller = fxmlLoader.getController();
+            System.out.println("Passing object: " + tableviewPLC.getSelectionModel().getSelectedItem().getName());
+            ProductionBlock plc = tableviewPLC.getSelectionModel().getSelectedItem();
+            controller.populatePLC(plc);
+            
+            stageAddPLC.setScene(scene);
+            stageAddPLC.initStyle(StageStyle.UTILITY); //Set borders and buttons of stage to minimum
+            stageAddPLC.showAndWait(); //Continue executing after stage has been closed (indicating a change to PLC)
+            
+            populateListView(); //Update tableview
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
     }
 
-    public synchronized void addPLC() throws IOException, ClassNotFoundException {
+    /**
+     * Method used to open ScenePopupController. Used for creating a new
+     * production block object.
+     */
+    public synchronized void addPLC() {
         Stage stageAddPLC = new Stage();
         stageAddPLC.initModality(Modality.APPLICATION_MODAL);
-        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_popup.fxml"));
-        Scene scene = new Scene(root);
+        Parent root;
+        try {
+            root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_popup.fxml"));
+            Scene scene = new Scene(root);
+            stageAddPLC.setScene(scene);
+            stageAddPLC.initStyle(StageStyle.UTILITY); //Set borders and buttons of stage to minimum
+            stageAddPLC.showAndWait();//Continue executing after stage has been closed (indicating a new PLC was added)
 
-        stageAddPLC.setScene(scene);
-        stageAddPLC.initStyle(StageStyle.UTILITY);
-        stageAddPLC.showAndWait();
+            populateListView(); // Update tableview
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
 
-        populateListView();
     }
 
     public synchronized void checkStatus() {
         ArrayList<ProductionBlock> plcList = new ArrayList<>();
         new Thread(() -> {
-        plcList.addAll(scada.getUpdatedPLCList());
-        
-        synchronized(PLCTable) {
-            PLCTable.clear();
-            PLCTable.addAll(plcList);
-        }
+            plcList.addAll(scada.getUpdatedPLCList());
+
+            synchronized (PLCTable) {
+                PLCTable.clear();
+                PLCTable.addAll(plcList);
+            }
         }).start();
 
         tableviewPLC.refresh();
-        //int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
-        //tableviewPLC.getSelectionModel().select(currentSelectionIndex);
 
         System.out.println("Updated PLC's loaded (if any)");
-        //ArrayList<ProductionBlock> plcs = new ArrayList<>(tableviewPLC.getItems());
-        //scada.checkStatus(plcs);
-        //tableviewPLC.refresh();
     }
 
-    public synchronized void removePLC() throws IOException, ClassNotFoundException {
+    /**
+     * Method called for removing a production block.
+     */
+    public synchronized void removePLC() {
         if (tableviewPLC.getSelectionModel().getSelectedItem() != null) {
             ProductionBlock selectedPLC = tableviewPLC.getSelectionModel().getSelectedItem();
             scada.removePLC(selectedPLC);
@@ -154,15 +168,19 @@ public class SceneScadaController implements Initializable {
         }
     }
 
+    /**
+     * Method used for updating the timer label. When end is reached, it calls
+     * checkStatus() and resets the counter
+     */
     private void startTimer() {
         new Thread(() -> {
             for (int i = countDownTime; i >= 0; i--) {
                 try {
-                    labelTimer.setText("Næste tjek: " + i + " sek");
-                    Thread.sleep(1000);
-                    if (i <= 0) {
-                        checkStatus();
-                        i = countDownTime;
+                    labelTimer.setText("Næste tjek: " + i + " sek"); //Text to set inside timer label
+                    Thread.sleep(1000); //time between label updates
+                    if (i == 0) {
+                        checkStatus(); // Call to update status of all production blocks in the tablevie
+                        i = countDownTime; //Reset timer back to selected time interval
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

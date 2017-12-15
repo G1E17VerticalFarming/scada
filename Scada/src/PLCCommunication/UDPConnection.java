@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package PLCCommunication;
 
+import interfaces.IMessage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.*;
 
 /**
  * Connect and communicate with ABB PLC via UDP
- * PLC default address is: 192.168.0.100 og PC
- * PC must have a fixes address at same subnet ex. 192.168.0.100
+ * PLC default address is: 192.168.0.10 and PC must have a fixed address at same subnet ex. 192.168.0.1
  *
  * @author Steffen Skov
  */
@@ -21,7 +15,6 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
     private InetAddress adr = null;
     private int port;
     transient private DatagramPacket answerDP = null;
-    //private Message mess;
 
     /**
      * Create UDP connection
@@ -40,8 +33,6 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
             System.out.println("Unknown host address");
         }
         answerDP = new DatagramPacket(new byte[110], 110);
-
-
     }
 
     /**
@@ -59,8 +50,6 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
             System.out.println("Unknown host address");
         }
         answerDP = new DatagramPacket(new byte[110], 110);
-
-
     }
 
     /**
@@ -79,10 +68,8 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
         answerDP = new DatagramPacket(new byte[110], 110);
     }
 
-
     private void setInetAdr(String adr) throws UnknownHostException {
         this.setAdr(InetAddress.getByName(adr));
-
     }
 
     /**
@@ -97,16 +84,14 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
             p = mess.packMessage();
             DatagramPacket packet = new DatagramPacket(p, 0, p.length, adr, port);
 
-            //socket = new DatagramSocket(port, adr);// to test with local host
             socket = new DatagramSocket();
 
-            //System.out.println("Packet content:" + packet);
             socket.send(packet);
-            socket.setSoTimeout(5000); //wait for answar max. 1 sec.
+            socket.setSoTimeout(5000); //wait for answer max. 5 sec.
             socket.receive(answerDP);
             byte[] a = answerDP.getData();
             mess.answer = a;
-            if (a[DIRECTION] == FROMPLC) // Dicard own message
+            if (a[DIRECTION] == FROMPLC) // Discard own message
             {
                 System.out.println("Data received:" + answerDP.getLength() + " byte " + a[0] + "," + a[1] + "," + a[2] + "," + a[3] + "," + a[10] + ".....");
                 if (!mess.answerIsValid()) {
@@ -146,6 +131,9 @@ public class UDPConnection extends PLCConnection implements IMessage, Serializab
         return port;
     }
 
+    /**
+     * @return the host address
+     */
     public String getAdr() {
         return adr.getHostAddress();
     }

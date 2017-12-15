@@ -1,10 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.domain;
-
 
 import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
@@ -27,7 +21,7 @@ import scada.api.ApiSendController;
 import scada.domain.interfaces.IScadaApiSend;
 
 /**
- * @author chris
+ * Class used to create a domain layer object of the SCADA. This class ties GUI and Persistence-layer together.
  */
 public class Scada implements IScada {
 
@@ -38,7 +32,6 @@ public class Scada implements IScada {
     private final IScadaApiSend apiSend;
 
     private static Scada instance = null;
-
     public static Scada getInstance() {
         if (instance == null) {
             instance = new Scada();
@@ -46,7 +39,6 @@ public class Scada implements IScada {
         return instance;
     }
 
-    //private HashMap<Integer, ProductionBlock> pbMap;
     private ArrayList<ProductionBlock> pbList;
     private ArrayList<ProductionBlock> pbUpdateList;
     private ArrayList<ProductionBlock> pbDeleteList;
@@ -54,10 +46,12 @@ public class Scada implements IScada {
     private HashMap<Integer, GrowthProfile> manualGPMap;
     private ArrayList<Log> logList;
     private boolean continueAutomation = true;
-
     private int debugCount = 0;
     private SimpleDateFormat ft = new SimpleDateFormat("dd/MM-yyyy HH:mm:ss");
 
+    /**
+     * Singleton instantiation of the class, so there can only ever be one instance.
+     */
     protected Scada() {
         this.readWriteProductionBlock = FileHandler.getInstance();
         this.readWriteLog = FileHandler.getInstance();
@@ -76,7 +70,6 @@ public class Scada implements IScada {
         this.initiateTimedAutomationTask(20000);
 
         this.updateProductionBlockMap();
-        //this.updateGrowthProfileMap();
     }
 
     @Override
@@ -98,27 +91,13 @@ public class Scada implements IScada {
     }
 
     private synchronized void savePLC() {
-        
         try {
             this.readWriteProductionBlock.savePLC(this.pbList);
         } catch (IOException ex) {
             System.out.println("Error: " + ex);
         }
-
-        /*if (this.apiSend.ping()) {
-            this.pbList.parallelStream().forEach((ProductionBlock pb) -> {
-                if(pb.getId() == -1) {
-                    this.apiSend.saveProductionBlock(pb);
-                } else if(pb.getId() == -2) {
-                    this.apiSend.deleteProductionBlock(pb);
-                } else if(pb.getId() == -3) {
-                    
-                }
-            });
-        }*/
     }
 
-    //@Override
     private ArrayList<ProductionBlock> readPLCList() {
         try {
             return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
@@ -239,7 +218,6 @@ public class Scada implements IScada {
                 this.manualGPMap.put(gp.getId(), gp);
             }
         }
-        
         for(ProductionBlock pb : this.pbList) {
             System.out.println("Required GP: " + pb.getGrowthConfigId());
             if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
@@ -252,12 +230,6 @@ public class Scada implements IScada {
         }
         this.saveGrowthProfiles();
     }
-
-    /*public void addGrowthProfile(GrowthProfile gp) {
-        this.gpMap.put(gp.getId(), gp);
-        this.saveGrowthProfiles();
-    }
-    */
 
     public int addManualGrowthProfile(GrowthProfile gp) {
         int highestId = 1;
@@ -303,8 +275,6 @@ public class Scada implements IScada {
     }
 
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
-        //Probalby should check whether selectedGp is null
-        System.out.println("man" + pb.getManualGrowthConfigId());
         if (pb.getManualGrowthConfigId() == 0) {
             if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
                 GrowthProfile fetchedGp;
@@ -323,8 +293,6 @@ public class Scada implements IScada {
     }
 
     public synchronized void checkStatus() {
-
-        //for (ProductionBlock plc : this.pbList) { // Add threads
         this.pbList.parallelStream().forEach((ProductionBlock plc) -> {
             Date dNow = new Date();
             System.out.println("Checking status of " + plc.getIpaddress() + ":" + plc.getPort());

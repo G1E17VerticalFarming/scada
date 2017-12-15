@@ -1,23 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.domain;
 
-import shared.ProductionBlock;
-import shared.GrowthProfile;
 import PLCCommunication.PLC;
 import PLCCommunication.UDPConnection;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.TreeMap;
+import shared.GrowthProfile;
 import shared.Light;
+import shared.ProductionBlock;
+
+import java.util.TreeMap;
 
 /**
- *
- * @author DanielToft
+ * TODO WRITE ME
  */
 public class AutomationProcess {
     

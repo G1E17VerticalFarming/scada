@@ -8,19 +8,20 @@ package PLCCommunication;
 
 /**
  * Methods to PLC communication
+ *
  * @author Steffen Skov
  */
-abstract public class PLCConnection 
-{
+abstract public class PLCConnection {
     protected Message mess;
+
     abstract public boolean send();
-    
+
     /**
      * Add message
+     *
      * @param m the message
      */
-    public void addMessage(Message m)
-    {
+    public void addMessage(Message m) {
         mess = m;
     }
 }

@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.gui;
 
 import javafx.application.Application;
@@ -12,6 +7,9 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+/**
+ * Main class of program, used to start a JavaFX scene
+ */
 public class Main extends Application {
 
     public static void mainMethod(String[] args) {
@@ -25,9 +23,9 @@ public class Main extends Application {
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
-        //stage.getIcons().add(new Image(Main.class.getResourceAsStream("icon.png")));
-        stage.setTitle("Vertical Farming SCADA");
-        stage.setResizable(false);
+        stage.setTitle("Vertical Farming SCADA"); // Set title of program
+        stage.setResizable(false); //Make user unable to resize program
         stage.show();
+        stage.setOnHidden(e -> SceneScadaController.shutdown()); //Create listener to close all threads upon exiting
     }
 }

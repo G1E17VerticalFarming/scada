@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package scada.gui;
 
 import javafx.fxml.FXML;
@@ -20,8 +15,7 @@ import scada.domain.interfaces.IScada;
 
 /**
  * FXML Controller class
- *
- * @author mads
+ * Scene used for creating new Production block objects that are then saved to disk
  */
 public class ScenePopupController implements Initializable {
     private IScada scada;
@@ -39,13 +33,16 @@ public class ScenePopupController implements Initializable {
         this.scada = Scada.getInstance();
     }
 
+    /**
+     * Button action used to create new Production Block object.
+     */
     @FXML
     private void handleAddButtonAction() throws IOException, ClassNotFoundException {
         int port = 0;
         String IP = IPTextField.getText().trim();
         String name = nameTextField.getText().trim();
 
-        // GET PORT NUMBER
+        // Get port number
         try {
             port = Integer.parseInt(portTextField.getText().trim());
 
@@ -53,14 +50,18 @@ public class ScenePopupController implements Initializable {
             System.out.println("A number was not input as port.");
         }
 
+        //Check if inputs for IP and name are empty, and if port is between 1024 and 65536
         if (!IP.isEmpty() && !name.isEmpty() && port > 1024 && port < 65536) {
             ProductionBlock plc = new ProductionBlock();
             plc.setPort(port);
             plc.setIpaddress(IP);
             plc.setName(name);
             System.out.println("Added PLC " + plc.getName() + " - " + plc.getIpaddress() + ":" + plc.getPort());
+
+            //Save object to disk
             scada.savePLC(plc);
 
+            //Close scene
             Stage stage = (Stage) addButton.getScene().getWindow();
             stage.close();
         } else {
@@ -69,12 +70,18 @@ public class ScenePopupController implements Initializable {
 
     }
 
+    /**
+     * Button action used to close scene
+     */
     @FXML
     private void handleCancelButtonAction() {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
 
+    /**
+     * Button action used to listen for "Enter" button being pressed if inside a text field. Calls handleAddButtonAction()
+     */
     @FXML
     private void onEnter() throws IOException, ClassNotFoundException {
         handleAddButtonAction();

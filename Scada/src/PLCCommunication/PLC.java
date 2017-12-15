@@ -1,21 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package PLCCommunication;
 
-import API.IGreenhouse;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import interfaces.IGreenhouse;
+import interfaces.ICommands;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.List;
 
 /**
  * API to communicate to the PLC
@@ -26,11 +15,6 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     private static final long serialVersionUID = 1L;
     transient private UDPConnection conn;
     transient private Message mess;
-    private String ipaddress;
-    private int portnumber;
-    transient private int status;
-    private String fileName = "Scada/src/resources/PLClist.dat";
-
 
     /**
      * Create greenhouse API
@@ -54,9 +38,8 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * CMD: 1
      *
      * @param temp : temperature in celsius (0 < T > 30)
-     * @return true if processed
+     * @return true if command was processed
      */
-
     public boolean SetTemperature(int temp) {
         int kelvin = temp + 273;
         mess = new Message(TEMP_SETPOINT);
@@ -75,7 +58,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * CMD:2
      *
      * @param moist in % ( 10 > M > 90 )
-     * @return true if processed
+     * @return true if command was processed
      */
     public boolean SetMoisture(int moist) {
         mess = new Message(MOIST_SETPOINT);
@@ -109,8 +92,8 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
      * Setpoint for blue light inside PLC
      * CMD: 4
      *
-     * @param level in percent
-     * @return true if processed
+     * @param level in percent ( 0 <= M >= 100 )
+     * @return true if command was processed
      */
     public boolean SetBlueLight(int level) {
         System.out.println("Set blue light to " + level);
@@ -124,11 +107,10 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     }
 
     /**
-     * Add water for some seconds. Pump is stopped if height of water is
-     * exceeded
+     * Add water for x seconds. Pump is stopped if height of water is exceeded
      * CMD: 6
      *
-     * @param sec : Second to turn on the pump {0 <= sec < 120}
+     * @param sec : Seconds to turn on the pump {0 <= sec < 120}
      * @return true if processed
      */
     public boolean AddWater(int sec) {
@@ -169,7 +151,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     }
 
     /**
-     * Read tempature inside the PLC
+     * Read temperature inside the PLC
      * CMD:9
      *
      * @return Temperature in kelvin
@@ -178,7 +160,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         System.out.println("Read greenhouse temperature");
         mess = new Message(READ_GREENHOUSE_TEMP);
         double temp = -1;
-        mess.setData(); //None data
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
@@ -200,7 +182,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         System.out.println("Read outdoor temperature");
         mess = new Message(READ_OUTDOOR_TEMP);
         double temp2 = -1;
-        mess.setData(); //None data
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
@@ -223,14 +205,14 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         System.out.println("Read moisture");
         mess = new Message(READ_MOISTURE);
         double moist = -1.0;
-        mess.setData(); //None data
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
                 moist = (double) (mess.getResultData())[0];
             else
                 moist = -2.0; // return a dummy value
-            // In real world moist will never be so low
+            // In the real world moisture will never be so low
         }
         System.out.println("Moisture is: " + moist + " %");
         return moist;
@@ -245,8 +227,8 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public double ReadWaterLevel() {
         System.out.println("Read water level");
         mess = new Message(READ_WATER_LEVEL);
-        double level = 0.0; // level
-        mess.setData(); //None data
+        double level = 0.0;
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
@@ -260,7 +242,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
 
     /**
      * NOT IMPLEMENTED IN THE GREENHOUSE
-     * Read higths of the plants
+     * Read height of the plants
      * CMD: 12
      *
      * @return Higths (cm?)
@@ -268,8 +250,8 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
     public double ReadPlantHeight() {
         System.out.println("Read height of plants");
         mess = new Message(READ_PLANT_HEIGHT);
-        double level = 0.0; // level
-        mess.setData(); //None data
+        double level = 0.0;
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             if (mess.getResultData() != null)
@@ -292,7 +274,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         mess = new Message(READ_ALL_ALARMS);
         BitSet alarms = new BitSet(32);
 
-        mess.setData(); //None data
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             alarms = fillBitSet(mess.getResultData());
@@ -300,7 +282,6 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         System.out.println("Alarm state is: " + alarms);
         return alarms;
     }
-
 
     private BitSet fillBitSet(byte[] al) {
         BitSet alarms = new BitSet(32);
@@ -336,7 +317,6 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         return false;
     }
 
-
     /**
      * Get all values as a byte array
      * CMD: 15
@@ -347,7 +327,7 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         byte[] result = new byte[100];
         System.out.println("Get status ");
         mess = new Message(GET_STATUS);
-        mess.setData(); //None data
+        mess.setData();
         conn.addMessage(mess);
         if (conn.send()) {
             result = mess.getResultData();
@@ -356,9 +336,8 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
         return result;
     }
 
-
     /**
-     * Set Fane speed
+     * Set Fan speed
      * CMD: 16
      *
      * @param speed : {OFF (0), LOW (1), HIGH(2)};
@@ -373,37 +352,6 @@ public class PLC implements IGreenhouse, ICommands, Serializable {
             return conn.send();
         }
         return false;
-
     }
 
-    public String getIpaddress() {
-        return ipaddress;
-    }
-
-    public void setIpaddress(String ipaddress) {
-        this.ipaddress = ipaddress;
-    }
-
-    public int getPortnumber() {
-        return portnumber;
-    }
-
-    public void setPortnumber(int portnumber) {
-        this.portnumber = portnumber;
-    }
-
-    protected List<PLC> get() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(this.fileName))) {
-            return (List<PLC>) ois.readObject();
-        } catch (IOException e) {
-            // Ignored
-        } catch (ClassNotFoundException | ClassCastException e) {
-            e.printStackTrace();
-        }
-        return new ArrayList<>();
-    }
-
-    public String toString() {
-        return "IP:" + ipaddress + "\nPort: " + portnumber;
-    }
 }
