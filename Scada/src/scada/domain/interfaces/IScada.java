@@ -1,6 +1,5 @@
 package scada.domain.interfaces;
 
-import API.IScadaFacade;
 import shared.ProductionBlock;
 
 import java.io.IOException;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 /**
  * TODO WRITE ME
  */
-public interface IScada extends IScadaFacade {
+public interface IScada {
     /**
      * This method reads a list of Production blocks from disk
      *

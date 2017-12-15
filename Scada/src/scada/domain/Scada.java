@@ -67,21 +67,6 @@ public class Scada implements IScada {
     }
 
     @Override
-    public boolean ping(String testData) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<shared.ProductionBlock> getProductionBlocks() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean setProduction(String productionBlock, String growthProfile) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public void savePLC(ArrayList<ProductionBlock> plcList) throws IOException {
         readWriteProductionBlock.savePLC(plcList);
     }

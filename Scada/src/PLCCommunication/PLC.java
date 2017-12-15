@@ -1,6 +1,6 @@
 package PLCCommunication;
 
-import API.IGreenhouse;
+import interfaces.IGreenhouse;
 
 import java.io.Serializable;
 import java.util.Arrays;
