@@ -9,7 +9,7 @@ import shared.ProductionBlock;
 import java.util.TreeMap;
 
 /**
- * TODO WRITE ME
+ * Class handling the automation process for PLC's
  */
 public class AutomationProcess {
     

@@ -10,31 +10,34 @@ import scada.domain.interfaces.IScadaApiSend;
 
 import shared.ProductionBlock;
 import shared.GrowthProfile;
-//import shared.Log;
 
 /**
- *
+ * Class is used to perform HTTP requests from SCADA. 
  * @author DanielToft
  */
 public class ApiSendController implements IScadaApiSend {
-    
-    private static ApiSendController instance = null;
 
+    private static ApiSendController instance = null;
+    private String address = "http://localhost:8081";
+    private String myIp = "127.0.0.1";
+    private int myPort = 6660;
+
+    /**
+     * Singleton design pattern
+     *
+     * @return The only instance of ApiSendController
+     */
     public static ApiSendController getInstance() {
         if (instance == null) {
             instance = new ApiSendController();
         }
         return instance;
     }
-    
-    private String address = "http://localhost:8081";
-    private String myIp = "127.0.0.1";
-    private int myPort = 6660;
-    
+
     private ApiSendController() {
-        
+
     }
-    
+
     @Override
     public ProductionBlock[] getAllProductionBlocks() {
         ProductionBlock[] pbArr;
@@ -46,7 +49,7 @@ public class ApiSendController implements IScadaApiSend {
         }
         return pbArr;
     }
-    
+
     @Override
     public ProductionBlock getSpecificProductionBlock(int id) {
         ProductionBlock pb;
@@ -58,10 +61,9 @@ public class ApiSendController implements IScadaApiSend {
         }
         return pb;
     }
-    
+
     @Override
     public String saveProductionBlock(ProductionBlock pb) {
-        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         String returnStr;
         try {
             returnStr = HttpOkhttpPostSend.doPostRequest(this.address + "/" + this.myIp + "/" + myPort + "/production_block/", pb);
@@ -98,7 +100,7 @@ public class ApiSendController implements IScadaApiSend {
         System.out.println(returnStr);
         return returnStr;
     }
-    
+
     @Override
     public GrowthProfile getSpecificGrowthProfile(int id) {
         GrowthProfile gp;
@@ -111,17 +113,6 @@ public class ApiSendController implements IScadaApiSend {
         return gp;
     }
     
-    /*public String saveLog(Log log) {
-        String returnStr;
-        try {
-            returnStr = HttpOkhttpPostSend.doPostRequest("http://localhost:8080/production_block/", log);
-        } catch (IOException ex) {
-            System.out.println("Something brok");
-            return "not success";
-        }
-        return returnStr;
-    }*/
-
     @Override
     public boolean ping() {
         boolean bool;

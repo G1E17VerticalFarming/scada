@@ -15,13 +15,16 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO WRITE ME
+ * Class which handles writing to and reading from local files.
  */
 public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, ReadWriteGrowthProfile {
     
     private String resourcesDir;
     private static FileHandler instance = null;
 
+    /**
+     * Private constructor
+     */
     private FileHandler() {
         try {
             this.resourcesDir = this.findPLCListPath();
@@ -31,6 +34,10 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         }
     }
 
+    /**
+     * Singleton design pattern
+     * @return The only instance of FileHandler
+     */
     public static FileHandler getInstance() {
         if (instance == null) {
             instance = new FileHandler();
@@ -40,7 +47,7 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
 
 
     @Override
-    public List<ProductionBlock> readPLCFile() throws IOException, ClassNotFoundException {
+    public List<ProductionBlock> readPLCFile() throws IOException {
         if(this.resourcesDir.isEmpty()) {
             System.out.println("Error: could not read file as there is found no valid path!");
             return null;
@@ -54,7 +61,7 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         try {
             fi = new FileInputStream(new File(path));
             if (fi.getChannel().size() > 0) {
-                in = new ObjectInputStream(fi); //Initiates the files content into ObjectInputStream
+                in = new ObjectInputStream(fi);
             }
             if (fi.getChannel().size() == 0) {
                 System.out.println("No PLC objects found.");
@@ -70,7 +77,6 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
                 list.add(plc);
             } catch (SocketTimeoutException exc) {
                 System.out.println("Error: " + exc);
-                // you got the timeout
                 break;
             } catch (EOFException exc) {
                 System.out.println("Error: " + exc);
@@ -78,11 +84,10 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
                 in = null;
                 break;
             } catch (IOException exc) {
-                // some other I/O error: print it, log it, etc.
                 System.out.println("Error: " + exc);
                 break;
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                System.out.println(e);
             }
         }
 
@@ -127,35 +132,8 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         JsonEncoder.stringifyObject(this.resourcesDir + "/pbDeleteList.json", pbArr);
     }
 
-    //@Override
-    /*public void savePLC(ProductionBlock plc) throws IOException, ClassNotFoundException {
-        ArrayList<ProductionBlock> list = new ArrayList<>(readPLCFile());
-        boolean found = false;
-        int highestID = 0;
-
-        for (ProductionBlock currentPLC : list) {
-            if (currentPLC.getId() > highestID) {
-                highestID = currentPLC.getId();
-            }
-
-            if (currentPLC.getId() == plc.getId()) { //IF PLC ALREADY EXISTS
-                currentPLC.setName(plc.getName());
-                currentPLC.setIpaddress(plc.getIpaddress());
-                currentPLC.setPort(plc.getPort());
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            plc.setId(highestID + 1);
-            list.add(plc);
-        }
-
-        savePLC(list);
-    }*/
-
     @Override
-    public void removePLC(int plcToRemove) throws IOException, ClassNotFoundException {
+    public void removePLC(int plcToRemove) throws IOException {
         if (this.resourcesDir.isEmpty()) {
             System.out.println("Error: could not write PLClist file as there is found no valid path!");
             return;
@@ -174,6 +152,12 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
         }
     }
 
+    /**
+     * Internal method to locate the PLC list, since the location was different
+     * depending on the OS you run.
+     * @return The filepath which contains the PLC list
+     * @throws FileNotFoundException If the file cannot be found in any of the locations
+     */
     private String findPLCListPath() throws FileNotFoundException {
         String filename = "Scada/src/resources"; //File containing the PLC's as objects
         String filename1 = "/src/resources"; //File containing the PLC's as objects
@@ -198,7 +182,7 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
     }
     
     @Override
-    public List<Log> readLogFile() throws IOException, ClassNotFoundException {
+    public List<Log> readLogFile() throws IOException {
         if(this.resourcesDir.isEmpty()) {
             System.out.println("Error: could not write file as there is found no valid path!");
             return null;
@@ -225,7 +209,7 @@ public class FileHandler implements ReadWriteProductionBlock, ReadWriteLog, Read
     }
 
     @Override
-    public List<GrowthProfile> readGrowthProfileFile() throws IOException, ClassNotFoundException {
+    public List<GrowthProfile> readGrowthProfileFile() throws IOException {
         if(this.resourcesDir.isEmpty()) {
             System.out.println("Error: could not write file as there is found no valid path!");
             return null;

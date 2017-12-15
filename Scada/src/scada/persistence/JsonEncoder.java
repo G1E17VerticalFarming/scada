@@ -30,6 +30,13 @@ public class JsonEncoder {
         }
     }
 
+    /**
+     * Converts the input obj into a json string object and writes it to filesource
+     * @param <T> Generic representation of the object
+     * @param fileSource The file to write json object to
+     * @param obj object to convert into json
+     * @return Json encoded string object which is generic
+     */
     public static <T> boolean stringifyObject(String fileSource, T obj) {
         ObjectMapper mapper = new ObjectMapper();
 

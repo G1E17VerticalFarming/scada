@@ -32,6 +32,11 @@ public class Scada implements IScada {
     private final IScadaApiSend apiSend;
 
     private static Scada instance = null;
+    
+    /**
+     * Singleton design pattern
+     * @return The only instance of Scada
+     */
     public static Scada getInstance() {
         if (instance == null) {
             instance = new Scada();
@@ -56,12 +61,7 @@ public class Scada implements IScada {
         this.readWriteProductionBlock = FileHandler.getInstance();
         this.readWriteLog = FileHandler.getInstance();
         this.readWriteGrowthProfile = FileHandler.getInstance();
-
         this.apiSend = ApiSendController.getInstance();
-        // Is here to prevent instantiation
-
-        // Local variables
-        //this.pbMap = new HashMap<>();
         this.pbUpdateList = new ArrayList<>();
         this.pbDeleteList = new ArrayList<>();
         this.gpMap = new HashMap<>();
@@ -90,6 +90,9 @@ public class Scada implements IScada {
         this.pbDeleteList.add(pb);
     }
 
+    /**
+     * Internal method to write the PLC list to file
+     */
     private synchronized void savePLC() {
         try {
             this.readWriteProductionBlock.savePLC(this.pbList);
@@ -98,6 +101,10 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Internal method to read the PLC list
+     * @return List of Production Block objects
+     */
     private ArrayList<ProductionBlock> readPLCList() {
         try {
             return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
@@ -107,6 +114,10 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Internal method to read GrowthProfile list
+     * @return List of GrowthProfile objects
+     */
     private ArrayList<GrowthProfile> readGbList() {
         try {
             return (ArrayList<GrowthProfile>) this.readWriteGrowthProfile.readGrowthProfileFile();
@@ -116,6 +127,10 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Internal method to begin automation of PLC's
+     * @param time Time interval to run the automation tasks
+     */
     private void initiateTimedAutomationTask(long time) {
         new Timer(true).scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -125,6 +140,9 @@ public class Scada implements IScada {
         }, time, time);
     }
 
+    /**
+     * Internal method to perform automation of PLC's
+     */
     private void doAutomation() {
         System.out.println("Starting updates!");
         if (this.continueAutomation) {
@@ -144,7 +162,6 @@ public class Scada implements IScada {
                 if(pb.getGrowthConfigId() <= 0) {
                     continue;
                 }
-                //this.updateLightLevel(pb);
                 GrowthProfile selectedGp = this.getProductionBlockGrowthProfile(pb);
 
                 AutomationProcess ap = new AutomationProcess(pb, selectedGp, secondsSinceMidnight);
@@ -159,20 +176,18 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Internal method to send the list of waiting PLC updates to MES system.
+     * If MES is still offline, wait with emptying the internal map.
+     * If connection is alive (tested through ping method) it will update each
+     * individual PLC through MES.
+     * Does the same with the map holding waiting PLC deletions.
+     */
     private synchronized void updateProductionBlockMap() {
-        // Fetch list from MES, if not, just use what you have
-        // pbArr = API.getBlaBlaBla();
-
-        // For debug
-        System.out.println("Updating pbMap");
-        //ProductionBlock[] pbArr = {new ProductionBlock(0, "10.126.5.242", 5000, "n1")};
-        //pbArr[0].setGrowthConfigId(1);
         ArrayList<ProductionBlock> pbList;
 
         if (this.apiSend.ping()) {
             if(!this.pbUpdateList.isEmpty()) {
-                //If one or more of the updateProductionBlock calls fails, it will still delete the list. 
-                // This will require some extra exception handling to make it robust.
                 this.pbUpdateList.parallelStream().forEach((ProductionBlock pb) -> {
                     if(pb.getId() < 0) {
                         this.apiSend.saveProductionBlock(pb);
@@ -183,8 +198,6 @@ public class Scada implements IScada {
                 this.pbUpdateList.clear();
             }
             if(!this.pbDeleteList.isEmpty()) {
-                //If one or more of the updateProductionBlock calls fails, it will still delete the list. 
-                // This will require some extra exception handling to make it robust.
                 this.pbDeleteList.parallelStream().forEach((ProductionBlock pb) -> this.apiSend.deleteProductionBlock(pb));
                 this.pbDeleteList.clear();
             }
@@ -193,25 +206,22 @@ public class Scada implements IScada {
             pbList = this.readPLCList();
         }
 
-        System.out.println("TEST" + pbList.size());
-
         this.pbList = pbList;
         this.savePLC();
         this.updateGrowthProfileMap();
     }
 
+    /**
+     * Internal method to update the internal GrowthProfile map with the
+     * Growth Profile objects required by the PLC's locally.
+     */
     private synchronized void updateGrowthProfileMap() {
-        // Fetch list from MES, if not, just use what you have
-        // pbArr = API.getBlaBlaBla();
-
-        // For debug
         System.out.println("Updating gbMap");
         List<GrowthProfile> gbList;
 
         gbList = this.readGbList();
         
         for (GrowthProfile gp : gbList) {
-            System.out.println("gp..." + gp.getId());
             if (gp.getId() >= 0) {
                 this.gpMap.put(gp.getId(), gp);
             } else {
@@ -219,7 +229,6 @@ public class Scada implements IScada {
             }
         }
         for(ProductionBlock pb : this.pbList) {
-            System.out.println("Required GP: " + pb.getGrowthConfigId());
             if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
                 if(pb.getGrowthConfigId() == 0) {
                     continue;
@@ -231,6 +240,12 @@ public class Scada implements IScada {
         this.saveGrowthProfiles();
     }
 
+    /**
+     * Method to add a GrowthProfile to the internal GrowthProfile map manually
+     * Will run through the map and find the highest available unique id.
+     * @param gp GrowthProfile object to add
+     * @return the highest available unique ID in the map
+     */
     public int addManualGrowthProfile(GrowthProfile gp) {
         int highestId = 1;
         for (Integer integer : this.manualGPMap.keySet()) {
@@ -244,6 +259,9 @@ public class Scada implements IScada {
         return highestId;
     }
 
+    /**
+     * Internal method to write internal growth profile map to json encoded file
+     */
     private void saveGrowthProfiles() {
         Set<GrowthProfile> gpSet = new HashSet<>();
         gpSet.addAll(this.manualGPMap.values());
@@ -256,16 +274,26 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Method to add a Log object to the internal log map
+     * @param log 
+     */
     public void addLog(Log log) {
         this.logList.add(log);
         this.saveLogs();
     }
 
+    /**
+     * Method to clear local list of Log objects and save them
+     */
     public void clearLogList() {
         this.logList.clear();
         this.saveLogs();
     }
 
+    /**
+     * Internal method to write internal log map to json encoded file
+     */
     private void saveLogs() {
         try {
             this.readWriteLog.writeLogFile(this.logList);
@@ -274,6 +302,11 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Method to get a GrowthProfile object from a given Production Block object
+     * @param pb Production Object to fetch GrowthProfile for
+     * @return GrowthProfile object
+     */
     public GrowthProfile getProductionBlockGrowthProfile(ProductionBlock pb) {
         if (pb.getManualGrowthConfigId() == 0) {
             if(!this.gpMap.containsKey(pb.getGrowthConfigId())) {
@@ -292,6 +325,9 @@ public class Scada implements IScada {
         }
     }
 
+    /**
+     * Method to check status of each PLC connected to SCADA
+     */
     public synchronized void checkStatus() {
         this.pbList.parallelStream().forEach((ProductionBlock plc) -> {
             Date dNow = new Date();
@@ -299,16 +335,15 @@ public class Scada implements IScada {
 
             PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
 
-            // Check status of PLC
             double temp1 = plccomm.ReadTemp1();
 
-            if (temp1 == -1) { // No connection to PLC
+            if (temp1 == -1) {
                 plc.setTemp1(-1);
                 plc.setTemp2(-1);
                 plc.setMoisture(-1);
                 plc.setStatus("No connection");
                 plc.setFanspeed(-1);
-            } else if (temp1 == -2) { // Error in returned data
+            } else if (temp1 == -2) {
                 plc.setTemp1(-2);
                 plc.setTemp2(-2);
                 plc.setMoisture(-2);
@@ -323,14 +358,7 @@ public class Scada implements IScada {
             }
             plc.setLastCheck("" + ft.format(dNow));
         });
-        /*try {
-            savePLC(newStatusList);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
         System.out.println("You checked the status of the PLC's ");
-
-        //this.savePLC(); // We don't have to save all of this!
     }
 
     @Override

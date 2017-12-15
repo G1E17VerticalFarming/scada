@@ -5,14 +5,6 @@
  */
 package scada.api;
 
-import shared.ProductionBlock;
-
-/*import okhttp3.RequestBody;
-import okhttp3.Request;
-import okhttp3.MediaType;
-import okhttp3.Response;
-import okhttp3.OkHttpClient;*/
-
 import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.MediaType;
@@ -20,51 +12,24 @@ import com.squareup.okhttp.Response;
 import com.squareup.okhttp.OkHttpClient;
 
 /**
- *
+ * Class defining HTTP request functions (POST/GET)
  * @author DanielToft
  */
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class HttpOkhttpPostSend {
 
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-
     
     /**
-     * @param args the command line arguments
+     * Method to perform a HTTP request POST call with a json encoded object
+     * obj, this then waits for a response and prints it accordingly. 
+     * @param <T> Generic representation of the object 
+     * @param url Where to send the HTTP request
+     * @param obj obj to json encode
+     * @return HTTP response code based on the response from HTTP request
+     * @throws IOException if response body is null or you recieve any http status code other than 200 (OK)
      */
-    public static void main(String[] args) {
-        try {
-            //System.out.println(doPostRequest("http://skjoldtoft.dk/daniel/g1e17/config_switch.php", "{\"case\":\"getgeoaddresslist\"}"));
-            /*System.out.println(doPostRequest("http://localhost:8080/user/", "{\n" +
-"  	\"id\":2,\n" +
-"    \"content\":\"wowowo\",\n" +
-"    \"test\":{\n" +
-"    	\"id\":1,\n" +
-"          \"testString\":\"hunnar p makker, det virker\"\n" +
-"    }\n" +
-"}"));*/
-            //ProductionBlock[] pbArr = doGetRequest("http://localhost:8080/production_block/", ProductionBlock[].class);
-            //System.out.println(pbArr[0].getName());
-            System.out.println(doGetRequest("http://localhost:8081/ping/", Boolean.class));
-        } catch (IOException ex) {
-            Logger.getLogger(HttpOkhttpPostSend.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    /*public static <T> String doPostRequest(String url, T obj) throws IOException {
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = RequestBody.create(JSON, Json.stringifyObject(obj));
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        Response response = client.newCall(request).execute();
-        return response.body().string();
-    }*/
-    
     public static <T> String doPostRequest(String url, T obj) throws IOException {
         OkHttpClient client = new OkHttpClient();
         RequestBody body = RequestBody.create(JSON, Json.stringifyObject(obj));
@@ -82,6 +47,15 @@ public class HttpOkhttpPostSend {
         throw new IOException("Error[" + response.code() + "]: " + response.body().string());
     }
     
+    /**
+     * Method to perform a HTTP request GET call with a json encoded object
+     * obj, this then waits for a response and prints it accordingly. 
+     * @param <T> Generic representation of the object 
+     * @param url Where to send the HTTP request
+     * @param classType Which object to convert the response into
+     * @return A json decoded object of type classType.
+     * @throws IOException if response body is null or you recieve any http status code other than 200 (OK)
+     */
     public static <T> T doGetRequest(String url, Class<T> classType) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()

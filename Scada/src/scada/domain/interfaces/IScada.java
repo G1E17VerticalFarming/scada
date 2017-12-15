@@ -4,15 +4,39 @@ import shared.ProductionBlock;
 
 import java.util.ArrayList;
 
-
+/**
+ * 
+ * @author chris
+ */
 public interface IScada {
-    ArrayList<ProductionBlock> getPLCList();
     
-    ArrayList<ProductionBlock> getUpdatedPLCList();
-
-    void savePLC(ProductionBlock plc);
+    /**
+     * 
+     * @return 
+     */
+    public abstract ArrayList<ProductionBlock> getPLCList();
     
-    void updatePLC(ProductionBlock pb);
+    /**
+     * 
+     * @return 
+     */
+    public abstract ArrayList<ProductionBlock> getUpdatedPLCList();
 
-    void removePLC(ProductionBlock pb);
+    /**
+     * 
+     * @param plc 
+     */
+    public abstract void savePLC(ProductionBlock plc);
+    
+    /**
+     * 
+     * @param pb 
+     */
+    public abstract void updatePLC(ProductionBlock pb);
+
+    /**
+     * 
+     * @param pb 
+     */
+    public abstract void removePLC(ProductionBlock pb);
 }

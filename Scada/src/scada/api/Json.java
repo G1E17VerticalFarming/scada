@@ -5,7 +5,6 @@
  */
 package scada.api;
 
-import java.io.File;
 import java.io.IOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,11 +34,16 @@ public class Json {
         }
     }
     
+    /**
+     * Converts the input obj into a json string object
+     * @param <T> Generic representation of the object
+     * @param obj object to convert into json
+     * @return Json encoded string object which is generic
+     */
     public static <T> String stringifyObject(T obj) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            // convert user object to json string and return it 
             return mapper.writeValueAsString(obj);
         } catch (Exception e) {
             e.printStackTrace();
