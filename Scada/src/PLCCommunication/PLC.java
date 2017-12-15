@@ -1,7 +1,7 @@
 package PLCCommunication;
 
 import interfaces.IGreenhouse;
-
+import interfaces.ICommands;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.BitSet;

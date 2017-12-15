@@ -1,5 +1,6 @@
 package PLCCommunication;
 
+import interfaces.IMessage;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 

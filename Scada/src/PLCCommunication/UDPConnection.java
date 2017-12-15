@@ -1,5 +1,6 @@
 package PLCCommunication;
 
+import interfaces.IMessage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.*;
