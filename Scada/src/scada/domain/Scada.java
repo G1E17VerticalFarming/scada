@@ -108,7 +108,7 @@ public class Scada implements IScada {
     private ArrayList<ProductionBlock> readPLCList() {
         try {
             return (ArrayList<ProductionBlock>) readWriteProductionBlock.readPLCFile();
-        } catch (IOException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             System.out.println(ex);
             return new ArrayList<>();
         }
@@ -121,7 +121,7 @@ public class Scada implements IScada {
     private ArrayList<GrowthProfile> readGbList() {
         try {
             return (ArrayList<GrowthProfile>) this.readWriteGrowthProfile.readGrowthProfileFile();
-        } catch (IOException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             System.out.println(ex);
             return new ArrayList<>();
         }
