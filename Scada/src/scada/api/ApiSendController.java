@@ -34,6 +34,9 @@ public class ApiSendController implements IScadaApiSend {
         return instance;
     }
 
+    /**
+     * Constructor required by JSON
+     */
     private ApiSendController() {
 
     }

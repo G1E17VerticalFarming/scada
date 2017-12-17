@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
@@ -23,9 +22,9 @@ public class Main extends Application {
         Scene scene = new Scene(root);
 
         stage.setScene(scene);
-        stage.setTitle("Vertical Farming SCADA"); // Set title of program
-        stage.setResizable(false); //Make user unable to resize program
+        stage.setTitle("Vertical Farming SCADA");
+        stage.setResizable(false);
         stage.show();
-        stage.setOnHidden(e -> SceneScadaController.shutdown()); //Create listener to close all threads upon exiting
+        stage.setOnHidden(e -> SceneScadaController.shutdown());
     }
 }

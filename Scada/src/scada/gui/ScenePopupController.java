@@ -42,7 +42,6 @@ public class ScenePopupController implements Initializable {
         String IP = IPTextField.getText().trim();
         String name = nameTextField.getText().trim();
 
-        // Get port number
         try {
             port = Integer.parseInt(portTextField.getText().trim());
 
@@ -50,7 +49,6 @@ public class ScenePopupController implements Initializable {
             System.out.println("A number was not input as port.");
         }
 
-        //Check if inputs for IP and name are empty, and if port is between 1024 and 65536
         if (!IP.isEmpty() && !name.isEmpty() && port > 1024 && port < 65536) {
             ProductionBlock plc = new ProductionBlock();
             plc.setPort(port);
@@ -58,10 +56,8 @@ public class ScenePopupController implements Initializable {
             plc.setName(name);
             System.out.println("Added PLC " + plc.getName() + " - " + plc.getIpaddress() + ":" + plc.getPort());
 
-            //Save object to disk
             scada.savePLC(plc);
 
-            //Close scene
             Stage stage = (Stage) addButton.getScene().getWindow();
             stage.close();
         } else {

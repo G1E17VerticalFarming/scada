@@ -5,27 +5,24 @@
  */
 package scada.api;
 
-//import scada.domain.IScada;
-//import scada.domain.Scada;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /**
- *
+ * Class to handle HTTP requests from MES.
  * @author DanielToft
  */
 public class ApiReceiveController {
     
-    //private IScada scada;
-    
     public ApiReceiveController() {
-        //this.scada = Scada.getInstance();
     }
     
+    /**
+     * Ping method used to test if connection is still alive.
+     * @return True or false if there is connection. 
+     */
     public ResponseEntity<Boolean> ping() {
         return new ResponseEntity<Boolean>(false, HttpStatus.OK);
-        //return new ResponseEntity<Boolean>(this.mes != null, HttpStatus.OK);
     }
     
 }

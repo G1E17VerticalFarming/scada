@@ -32,7 +32,7 @@ public class SceneScadaController implements Initializable {
 
     private IScada scada = Scada.getInstance();
     private final ObservableList<ProductionBlock> PLCTable = FXCollections.observableArrayList();
-    private final Integer countDownTime = 30; //SET AMOUNT OF SECONDS FOR SELFCHECK OF PLCS
+    private final Integer countDownTime = 30;
 
     @FXML
     private Button buttonAddPLC, buttonRemovePLC, buttonOpenPLC, buttonCheckStatus;
@@ -70,7 +70,6 @@ public class SceneScadaController implements Initializable {
         PLC_lastOK.setCellValueFactory(new PropertyValueFactory("lastOK"));
         PLC_ETA.setCellValueFactory(new PropertyValueFactory("estimatedDone"));
 
-        //Get currently selected item, and retain selection after updating tableview
         int currentSelectionIndex = tableviewPLC.getSelectionModel().getFocusedIndex();
         tableviewPLC.setItems(PLCTable);
 
@@ -110,10 +109,10 @@ public class SceneScadaController implements Initializable {
             controller.populatePLC(plc);
             
             stageAddPLC.setScene(scene);
-            stageAddPLC.initStyle(StageStyle.UTILITY); //Set borders and buttons of stage to minimum
-            stageAddPLC.showAndWait(); //Continue executing after stage has been closed (indicating a change to PLC)
+            stageAddPLC.initStyle(StageStyle.UTILITY);
+            stageAddPLC.showAndWait();
             
-            populateListView(); //Update tableview
+            populateListView();
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -131,10 +130,10 @@ public class SceneScadaController implements Initializable {
             root = FXMLLoader.load(getClass().getClassLoader().getResource("scene_popup.fxml"));
             Scene scene = new Scene(root);
             stageAddPLC.setScene(scene);
-            stageAddPLC.initStyle(StageStyle.UTILITY); //Set borders and buttons of stage to minimum
-            stageAddPLC.showAndWait();//Continue executing after stage has been closed (indicating a new PLC was added)
+            stageAddPLC.initStyle(StageStyle.UTILITY);
+            stageAddPLC.showAndWait();
 
-            populateListView(); // Update tableview
+            populateListView();
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -176,11 +175,11 @@ public class SceneScadaController implements Initializable {
         new Thread(() -> {
             for (int i = countDownTime; i >= 0; i--) {
                 try {
-                    labelTimer.setText("Næste tjek: " + i + " sek"); //Text to set inside timer label
-                    Thread.sleep(1000); //time between label updates
+                    labelTimer.setText("Næste tjek: " + i + " sek");
+                    Thread.sleep(1000);
                     if (i == 0) {
-                        checkStatus(); // Call to update status of all production blocks in the tablevie
-                        i = countDownTime; //Reset timer back to selected time interval
+                        checkStatus();
+                        i = countDownTime;
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

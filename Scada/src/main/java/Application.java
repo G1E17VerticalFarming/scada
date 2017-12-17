@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 // mvn install:install-file -Dfile={dir}.jar -DgroupId=FLIB -DartifactId=flib -Dversion=1.4 -Dpackaging=jar
 
 /**
- *
+ * Class used by MAVEN to run the MES application
  * @author DanielToft
  */
 @SpringBootApplication

@@ -6,7 +6,7 @@
 package scada.domain.interfaces;
 
 /**
- *
+ * Class to handle HTTP requests from MES
  * @author Daniel
  */
 public interface IScadaApiReceive {

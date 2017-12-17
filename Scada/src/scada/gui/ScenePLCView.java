@@ -10,7 +10,6 @@ import javafx.stage.Stage;
 import scada.domain.Scada;
 import shared.ProductionBlock;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import scada.domain.interfaces.IScada;
@@ -54,25 +53,19 @@ public class ScenePLCView implements Initializable {
      * Button action used to send SET commands to the chosen PLC.
      */
     @FXML
-    private void handleButtonSetAction() { // INSERT INTO A GP INSTEAD AND THEN ADD IT TO THE PB!
+    private void handleButtonSetAction() {
         new Thread(() -> {
-            //Disable "set" button so user can't create more threads while this one runs
             buttonSend.setDisable(true);
 
-            //Start new PLC connection based on information from current production block
             PLC plccomm = new PLC(new UDPConnection(plc.getPort(), plc.getIpaddress()));
 
-            //If production block is on then start sending setpoints
             if (plccomm.SetTemperature(temp1Spinner.getValueFactory().getValue())) {
-                //Set blue light value
                 if (lightBlueSpinner.getValueFactory().getValue() >= 0 && lightBlueSpinner.getValueFactory().getValue() <= 100) {
                     plccomm.SetBlueLight(lightBlueSpinner.getValueFactory().getValue());
                 }
-                //Set red light value
                 if (lightRedSpinner.getValueFactory().getValue() >= 0 && lightRedSpinner.getValueFactory().getValue() <= 100) {
                     plccomm.SetRedLight(lightRedSpinner.getValueFactory().getValue());
                 }
-                //turn on water for x seconds
                 plccomm.AddWater(waterSpinner.getValueFactory().getValue());
                 //set fanspeed
                 switch (fanSpeed.getSelectionModel().getSelectedItem().toString()) {
@@ -88,15 +81,13 @@ public class ScenePLCView implements Initializable {
                     default:
                         plccomm.SetFanSpeed(0);
                 }
-                //Update status label so user knows it succeeded
                 Platform.runLater(() -> status.setText("SUCCESS: Setpoints blev sendt til PLC'en"));
                 System.out.println("SUCCESS: Setpoints blev sendt til PLC'en");
             } else {
-                //Update status label so user knows it failed
                 Platform.runLater(() -> status.setText("FEJL: PLC kunne ikke kontaktes. Tjek indstillinger"));
                 System.out.println("FEJL: PLC kunne ikke kontaktes. Tjek indstillinger");
             }
-            buttonSend.setDisable(false); //Reenable "set" button again.
+            buttonSend.setDisable(false);
         }).start();
 
     }
@@ -132,7 +123,6 @@ public class ScenePLCView implements Initializable {
         plc.setIpaddress(plcIP.getText());
         this.scada.updatePLC(plc);
 
-        //Close scene
         Stage stage = (Stage) buttonUpdate.getScene().getWindow();
         stage.close();
     }
